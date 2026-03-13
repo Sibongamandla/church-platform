@@ -1,8 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { revalidateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const recapSchema = z.object({
@@ -31,7 +30,7 @@ export async function updateEventRecapAction(prevState: any, formData: FormData)
             },
         });
 
-        revalidateTag(CACHE_TAGS.events);
+        revalidatePath("/events");
         return { success: true };
     } catch (error) {
         console.error("Failed to update recap:", error);
@@ -64,7 +63,8 @@ export async function updateSermonHighlightAction(prevState: any, formData: Form
             },
         });
 
-        revalidateTag(CACHE_TAGS.sermons);
+        revalidatePath("/sermons");
+        revalidatePath("/");
         return { success: true };
     } catch (error) {
         console.error("Failed to update highlight:", error);
