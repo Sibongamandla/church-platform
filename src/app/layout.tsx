@@ -44,6 +44,8 @@ export const viewport = {
   ],
 };
 
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +59,7 @@ export default function RootLayout({
         manrope.variable,
         "antialiased min-h-screen flex flex-col bg-background text-foreground"
       )}>
+        <ScrollToTop />
         <Navbar />
         <main className="flex-1 pt-20">{children}</main>
         <Footer />
