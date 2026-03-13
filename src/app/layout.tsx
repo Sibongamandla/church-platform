@@ -45,12 +45,15 @@ export const viewport = {
 };
 
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { getCurrentUser } from "@/lib/auth";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
+
   return (
     <html lang="en" className="scroll-smooth">
       <body className={cn(
@@ -60,7 +63,7 @@ export default function RootLayout({
         "antialiased min-h-screen flex flex-col bg-background text-foreground"
       )}>
         <ScrollToTop />
-        <Navbar />
+        <Navbar user={user} />
         <main className="flex-1 pt-20">{children}</main>
         <Footer />
       </body>

@@ -7,15 +7,7 @@ import { Menu, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const navigation = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Events", href: "/events" },
-    { name: "Sermons", href: "/sermons" },
-    { name: "Visit", href: "/check-in" },
-];
-
-export function Navbar() {
+export function Navbar({ user }: { user: any }) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
@@ -32,6 +24,14 @@ export function Navbar() {
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [pathname]);
+
+    const navigation = [
+        { name: "Home", href: "/" },
+        { name: "About", href: "/about" },
+        { name: "Events", href: "/events" },
+        { name: "Sermons", href: "/sermons" },
+        { name: user ? "Check-in" : "Visit", href: "/check-in" },
+    ];
 
     return (
         <>
@@ -71,16 +71,27 @@ export function Navbar() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2">
-                        <Link href="/login" className="hidden md:block">
-                            <Button variant="ghost" className="rounded-full px-6 hover:bg-white/50 dark:hover:bg-white/10">
-                                Login
-                            </Button>
-                        </Link>
-                        <Link href="/check-in">
-                            <Button className="rounded-full px-6 font-bold shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90">
-                                I'm New
-                            </Button>
-                        </Link>
+                        {user ? (
+                            <Link href="/dashboard" className="hidden md:block">
+                                <Button variant="ghost" className="rounded-full px-6 hover:bg-white/50 dark:hover:bg-white/10">
+                                    Dashboard
+                                </Button>
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" className="hidden md:block">
+                                    <Button variant="ghost" className="rounded-full px-6 hover:bg-white/50 dark:hover:bg-white/10">
+                                        Login
+                                    </Button>
+                                </Link>
+                                <Link href="/check-in">
+                                    <Button className="rounded-full px-6 font-bold shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90">
+                                        I'm New
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
+
 
                         {/* Mobile Toggle */}
                         <div className="md:hidden ml-2">
@@ -104,7 +115,7 @@ export function Navbar() {
             )}>
                 <div className="flex justify-between items-center mb-12">
                     <span className="font-heading text-2xl font-bold tracking-tight uppercase">
-                        Soul<span className="text-muted-foreground">Church</span>
+                        Great Nation<span className="text-muted-foreground">Ministries</span>
                     </span>
                     <Button
                         variant="outline"
@@ -131,16 +142,26 @@ export function Navbar() {
                 </div>
 
                 <div className="mt-auto grid grid-cols-2 gap-4">
-                    <Link href="/login" className="w-full">
-                        <Button variant="outline" className="w-full h-14 text-lg rounded-2xl border-2">
-                            Member Login
-                        </Button>
-                    </Link>
-                    <Link href="/check-in" className="w-full">
-                        <Button className="w-full h-14 text-lg rounded-2xl bg-primary text-primary-foreground">
-                            Plan a Visit
-                        </Button>
-                    </Link>
+                    {user ? (
+                        <Link href="/dashboard" className="w-full col-span-2">
+                            <Button variant="outline" className="w-full h-14 text-lg rounded-2xl border-2">
+                                Dashboard
+                            </Button>
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="w-full">
+                                <Button variant="outline" className="w-full h-14 text-lg rounded-2xl border-2">
+                                    Member Login
+                                </Button>
+                            </Link>
+                            <Link href="/check-in" className="w-full">
+                                <Button className="w-full h-14 text-lg rounded-2xl bg-primary text-primary-foreground">
+                                    Plan a Visit
+                                </Button>
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </>

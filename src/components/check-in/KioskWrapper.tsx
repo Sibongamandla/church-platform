@@ -41,8 +41,7 @@ export function KioskWrapper({ recruiterSlug }: { recruiterSlug?: string }) {
                                     <UserCheck className="h-10 w-10" />
                                 </div>
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-bold text-primary font-heading uppercase">I'm a Member</h3>
-                                    <p className="text-sm text-muted-foreground font-medium">Search for your record</p>
+                                    <h3 className="text-2xl font-bold text-primary font-heading uppercase">Check in an existing member or self</h3>
                                 </div>
                                 <div className="absolute bottom-6 opacity-0 group-hover:opacity-100 transition-opacity text-primary">
                                     <ChevronRight className="h-6 w-6" />
@@ -57,8 +56,8 @@ export function KioskWrapper({ recruiterSlug }: { recruiterSlug?: string }) {
                                     <UserPlus className="h-10 w-10" />
                                 </div>
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-bold text-foreground font-heading uppercase">I'm New Here</h3>
-                                    <p className="text-sm text-muted-foreground font-medium">Create a new profile</p>
+                                    <h3 className="text-2xl font-bold text-foreground font-heading uppercase">Check in a new member</h3>
+                                    <p className="text-sm text-muted-foreground font-medium">(create a new profile)</p>
                                 </div>
                                 <div className="absolute bottom-6 opacity-0 group-hover:opacity-100 transition-opacity text-secondary-foreground">
                                     <ChevronRight className="h-6 w-6" />
