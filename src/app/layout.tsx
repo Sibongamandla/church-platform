@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Oswald, Manrope } from "next/font/google"; // Changed fonts
+import { Oswald, Manrope } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { ConditionalShell, ConditionalFooter } from "@/components/layout/ConditionalShell";
 import { cn } from "@/lib/utils";
 
 // Load fonts
@@ -63,9 +62,9 @@ export default async function RootLayout({
         "antialiased min-h-screen flex flex-col bg-background text-foreground"
       )}>
         <ScrollToTop />
-        <Navbar user={user} />
-        <main className="flex-1 pt-20">{children}</main>
-        <Footer />
+        <ConditionalShell user={user} />
+        <main className="flex-1">{children}</main>
+        <ConditionalFooter />
       </body>
     </html>
   );
