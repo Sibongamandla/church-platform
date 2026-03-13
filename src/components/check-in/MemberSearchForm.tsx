@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Search, Check, User, AlertCircle } from "lucide-react";
-import { searchMembersForKioskAction, checkInMemberAction } from "@/app/actions/attendance";
+import { Loader2, Search, Check, User, AlertCircle, ArrowLeft } from "lucide-react";
+import { searchMembersForKioskAction, checkInMultipleMembersAction } from "@/app/actions/attendance";
 import { useRouter } from "next/navigation";
 
 export function MemberSearchForm() {
@@ -13,7 +13,11 @@ export function MemberSearchForm() {
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<any[] | null>(null);
-    const [checkInLoading, setCheckInLoading] = useState<string | null>(null);
+    const [checkInLoading, setCheckInLoading] = useState(false);
+    
+    // Family Selection State
+    const [selectedMember, setSelectedMember] = useState<any | null>(null);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     async function handleSearch(e: React.FormEvent) {
         e.preventDefault();
@@ -21,6 +25,7 @@ export function MemberSearchForm() {
 
         setLoading(true);
         setResults(null);
+        setSelectedMember(null);
         try {
             const data = await searchMembersForKioskAction(query);
             setResults(data);
@@ -31,17 +36,127 @@ export function MemberSearchForm() {
         }
     }
 
-    async function handleCheckIn(memberId: string) {
-        setCheckInLoading(memberId);
+    function handleSelectRecord(member: any) {
+        setSelectedMember(member);
+        
+        // Auto-select everyone in the family by default
+        const toSelect = new Set<string>();
+        toSelect.add(member.id);
+        
+        if (member.family?.members) {
+             member.family.members.forEach((m: any) => toSelect.add(m.id));
+        }
+        
+        setSelectedIds(toSelect);
+    }
+
+    function toggleSelection(id: string) {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+    }
+
+    async function handleFinalCheckIn() {
+        if (selectedIds.size === 0) return;
+        
+        setCheckInLoading(true);
         try {
-            const res = await checkInMemberAction(memberId);
+            const res = await checkInMultipleMembersAction(Array.from(selectedIds));
             if (res?.success) {
                 router.push("/check-in?success=true");
             }
         } catch (error) {
             console.error(error);
-            setCheckInLoading(null);
+            setCheckInLoading(false);
         }
+    }
+
+    if (selectedMember) {
+        // Collect all available people to check in (primary + family)
+        const allPeople = [selectedMember];
+        if (selectedMember.family?.members) {
+            selectedMember.family.members.forEach((m: any) => {
+                if (m.id !== selectedMember.id) {
+                    allPeople.push(m);
+                }
+            });
+        }
+
+        return (
+            <div className="space-y-6 animate-fade-in-up">
+                <Button 
+                    variant="ghost" 
+                    onClick={() => setSelectedMember(null)} 
+                    className="pl-0 text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to search results
+                </Button>
+
+                <div className="space-y-2 text-left">
+                    <h3 className="text-xl font-bold">Who is checking in today?</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Select yourself and any family members joining you.
+                    </p>
+                </div>
+
+                <div className="space-y-3">
+                    {allPeople.map((person) => (
+                        <label 
+                            key={person.id}
+                            className={`flex items-center justify-between p-4 rounded-xl border bg-white cursor-pointer transition-all ${
+                                selectedIds.has(person.id) ? "border-primary shadow-sm bg-primary/5" : "hover:border-primary/50"
+                            }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors ${
+                                    selectedIds.has(person.id) ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+                                }`}>
+                                    <User className="h-5 w-5" />
+                                </div>
+                                <div className="text-left">
+                                    <p className={`font-bold ${selectedIds.has(person.id) ? "text-primary" : "text-foreground"}`}>
+                                        {person.firstName} {person.lastName}
+                                    </p>
+                                    {person.id === selectedMember.id && <p className="text-xs text-muted-foreground">Primary</p>}
+                                </div>
+                            </div>
+                            
+                            <div className={`h-6 w-6 rounded flex items-center justify-center transition-all ${
+                                selectedIds.has(person.id) ? "bg-primary text-primary-foreground" : "border-2"
+                            }`}>
+                                {selectedIds.has(person.id) && <Check className="h-4 w-4" />}
+                            </div>
+                            
+                            {/* Hidden checkbox for accessibility/logic */}
+                            <input 
+                                type="checkbox" 
+                                className="sr-only"
+                                checked={selectedIds.has(person.id)}
+                                onChange={() => toggleSelection(person.id)}
+                            />
+                        </label>
+                    ))}
+                </div>
+
+                <Button 
+                    className="w-full rounded-full h-12 text-lg" 
+                    onClick={handleFinalCheckIn}
+                    disabled={selectedIds.size === 0 || checkInLoading}
+                >
+                    {checkInLoading ? (
+                        <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Checking in...
+                        </>
+                    ) : (
+                        `Check In ${selectedIds.size} Person${selectedIds.size !== 1 ? 's' : ''}`
+                    )}
+                </Button>
+            </div>
+        );
     }
 
     return (
@@ -55,7 +170,7 @@ export function MemberSearchForm() {
                             placeholder="e.g. John or 082..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            disabled={loading || !!checkInLoading}
+                            disabled={loading}
                             className="pr-10"
                         />
                         {loading && (
@@ -68,7 +183,7 @@ export function MemberSearchForm() {
                 <Button
                     className="w-full rounded-full"
                     type="submit"
-                    disabled={loading || query.length < 2 || !!checkInLoading}
+                    disabled={loading || query.length < 2}
                 >
                     {loading ? (
                         <>
@@ -89,7 +204,7 @@ export function MemberSearchForm() {
                     <div className="flex flex-col items-center justify-center p-6 text-center border-2 border-dashed rounded-xl bg-neutral-50">
                         <AlertCircle className="h-8 w-8 text-muted-foreground mb-2" />
                         <p className="text-sm font-medium text-muted-foreground">No records found.</p>
-                        <p className="text-xs text-muted-foreground">Try a different spelling or number, or switch to "I'm New".</p>
+                        <p className="text-xs text-muted-foreground">Try a different spelling or number, or switch to "I'm New Here".</p>
                     </div>
                 )}
 
@@ -99,30 +214,21 @@ export function MemberSearchForm() {
                         {results.map((member) => (
                             <button
                                 key={member.id}
-                                onClick={() => handleCheckIn(member.id)}
-                                disabled={!!checkInLoading}
+                                onClick={() => handleSelectRecord(member)}
                                 className="w-full flex items-center justify-between p-4 rounded-xl border bg-white hover:border-primary hover:shadow-md transition-all text-left group"
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                        {checkInLoading === member.id ? (
-                                            <Loader2 className="h-5 w-5 animate-spin" />
-                                        ) : (
-                                            <User className="h-5 w-5" />
-                                        )}
+                                        <User className="h-5 w-5" />
                                     </div>
                                     <div>
                                         <p className="font-bold text-primary">{member.firstName} {member.lastName}</p>
                                         <p className="text-xs text-muted-foreground">{member.phone}</p>
                                     </div>
                                 </div>
-                                {checkInLoading === member.id ? (
-                                    <span className="text-xs font-medium text-primary">Checking in...</span>
-                                ) : (
-                                    <div className="h-8 w-8 rounded-full border flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground transition-colors">
-                                        <Check className="h-4 w-4" />
-                                    </div>
-                                )}
+                                <div className="h-8 w-8 rounded-full border flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground transition-colors">
+                                    <Check className="h-4 w-4" />
+                                </div>
                             </button>
                         ))}
                     </div>
