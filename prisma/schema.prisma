@@ -141,3 +141,16 @@ model Sermon {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model ServiceSession {
+  id          String   @id @default(cuid())
+  name        String   // "Sunday Service", "Mid-week Service"
+  date        DateTime
+  headcount   Int
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([name, date])
+}
+

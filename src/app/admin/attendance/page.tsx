@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentSessionName, getSessionDateRange } from "@/lib/sessions";
 import Link from "next/link";
-import { Calendar, CheckCircle, Users, QrCode } from "lucide-react";
+import { Calendar, CheckCircle, Users, QrCode, Clock } from "lucide-react";
 
 export default async function AttendanceDashboard() {
     const today = new Date();
@@ -38,6 +38,13 @@ export default async function AttendanceDashboard() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Link
+                        href="/admin/attendance/history"
+                        className="inline-flex items-center justify-center rounded-md border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
+                    >
+                        <Clock className="mr-2 h-4 w-4" />
+                        View History
+                    </Link>
                     <Link
                         href="/admin/attendance/check-in"
                         className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
@@ -82,7 +89,7 @@ export default async function AttendanceDashboard() {
                     {recentRecords.length === 0 ? (
                         <div className="p-6 text-center text-muted-foreground text-sm">No recent check-ins today.</div>
                     ) : (
-                        recentRecords.map(record => (
+                        recentRecords.map((record: any) => (
                             <div key={record.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
