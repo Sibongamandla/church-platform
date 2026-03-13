@@ -80,7 +80,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
                                     <span className="text-muted-foreground text-sm font-bold">{event.recapImages.length} Photos</span>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {event.recapImages.map((img, idx) => (
+                                    {event.recapImages.map((img: string, idx: number) => (
                                         <div 
                                             key={idx} 
                                             className={cn(
