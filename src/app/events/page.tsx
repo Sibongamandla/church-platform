@@ -10,7 +10,8 @@ export const metadata = {
 
 export default async function EventsPage() {
     const upcomingEvents = await getAllUpcomingEvents();
-    const pastEvents = await getPastEvents();
+    const pastEventsRaw = await getPastEvents();
+    const pastEvents = pastEventsRaw as any[];
 
     return (
         <div className="min-h-screen bg-background pb-32">
@@ -136,7 +137,7 @@ export default async function EventsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        {pastEvents.map((event) => (
+                        {pastEvents.map((event: any) => (
                             <div key={event.id} className="group relative bg-card rounded-[3.5rem] overflow-hidden border border-muted shadow-sm hover:shadow-2xl transition-all duration-700">
                                 <div className="flex flex-col h-full">
                                     {/* Preview Image */}

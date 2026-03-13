@@ -73,7 +73,7 @@ export const getCachedAnnouncements = unstable_cache(
 );
 export const getLatestSermon = unstable_cache(
     async () => {
-        return await prisma.sermon.findFirst({
+        return await (prisma as any).sermon.findFirst({
             orderBy: {
                 date: "desc",
             },
@@ -83,5 +83,25 @@ export const getLatestSermon = unstable_cache(
     {
         revalidate: REVALIDATE.MEDIUM,
         tags: [CACHE_TAGS.sermons],
+    }
+);
+
+export const getPastEvents = unstable_cache(
+    async () => {
+        return await prisma.event.findMany({
+            where: {
+                startDate: {
+                    lt: new Date(),
+                },
+            },
+            orderBy: {
+                startDate: "desc",
+            },
+        });
+    },
+    ["past-events"],
+    {
+        revalidate: REVALIDATE.MEDIUM,
+        tags: [CACHE_TAGS.events],
     }
 );
