@@ -60,8 +60,8 @@ export async function searchMembersForKioskAction(query: string) {
     const results = await prisma.member.findMany({
         where: {
             OR: [
-                { firstName: { contains: query } },
-                { lastName: { contains: query } },
+                { firstName: { contains: query, mode: 'insensitive' } },
+                { lastName: { contains: query, mode: 'insensitive' } },
                 { phone: { contains: query } }
             ],
             status: "ACTIVE"
