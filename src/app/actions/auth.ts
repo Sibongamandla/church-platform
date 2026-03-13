@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { hashPassword, verifyPassword, createSession, deleteSession } from "@/lib/auth";
+import { hashPassword, verifyPassword, createSession, deleteSession, getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -17,67 +17,8 @@ const loginSchema = z.object({
 });
 
 export async function registerAction(prevState: any, formData: FormData) {
-    const data = Object.fromEntries(formData.entries());
-    const parsed = registerSchema.safeParse(data);
-
-    if (!parsed.success) {
-        return { error: "Invalid input data" };
-    }
-
-    const { name, email, password } = parsed.data;
-
-    const existingUser = await prisma.user.findUnique({
-        where: { email },
-    });
-
-    if (existingUser) {
-        return { error: "Email already in use" };
-    }
-
-    const hashedPassword = await hashPassword(password);
-
-    const user = await prisma.user.create({
-        data: {
-            name,
-            email,
-            password: hashedPassword,
-        },
-    });
-
-    // Link to Member Record
-    // Check if a member with this email already exists
-    const existingMember = await prisma.member.findFirst({
-        where: { email }
-    });
-
-    if (existingMember) {
-        // Link existing member
-        await prisma.member.update({
-            where: { id: existingMember.id },
-            data: { userId: user.id }
-        });
-    } else {
-        // Create new member record
-        // Split name into First/Last loosely
-        const nameParts = name.split(" ");
-        const firstName = nameParts[0];
-        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Member";
-
-        await prisma.member.create({
-            data: {
-                firstName,
-                lastName,
-                email,
-                userId: user.id,
-                status: "ACTIVE"
-            }
-        });
-    }
-
-    // Automatically log in
-    await createSession(user.id);
-
-    redirect("/dashboard"); // Redirect to dashboard
+    // Public registration is disabled
+    return { error: "Public registration is disabled. Please contact an administrator." };
 }
 
 export async function loginAction(prevState: any, formData: FormData) {
@@ -105,6 +46,49 @@ export async function loginAction(prevState: any, formData: FormData) {
     }
 
     await createSession(user.id);
+
+    // Check if the user needs to set their password (onboarding)
+    if (user.setupRequired) {
+        redirect("/setup-password");
+    }
+
+    const adminRoles = ["SUPER_ADMIN", "CONTENT_EDITOR", "FINANCE_ADMIN", "REGISTRY_CLERK"];
+    if (adminRoles.includes(user.role)) {
+        redirect("/admin");
+    }
+    redirect("/dashboard");
+}
+
+const setupSchema = z.object({
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+});
+
+export async function setupPasswordAction(prevState: any, formData: FormData) {
+    const user = await getCurrentUser();
+    if (!user || !user.setupRequired) {
+        redirect("/login");
+    }
+
+    const data = Object.fromEntries(formData.entries());
+    const parsed = setupSchema.safeParse(data);
+
+    if (!parsed.success) {
+        return { error: parsed.error.issues[0].message };
+    }
+
+    const hashedPassword = await hashPassword(parsed.data.password);
+
+    await prisma.user.update({
+        where: { id: user.id },
+        data: {
+            password: hashedPassword,
+            setupRequired: false,
+        },
+    });
 
     const adminRoles = ["SUPER_ADMIN", "CONTENT_EDITOR", "FINANCE_ADMIN", "REGISTRY_CLERK"];
     if (adminRoles.includes(user.role)) {
