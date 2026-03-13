@@ -10,7 +10,9 @@ import {
     Megaphone,
     ClipboardCheck,
     QrCode,
-    Link as LinkIcon
+    Link as LinkIcon,
+    Video,
+    UserCheck
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -74,6 +76,20 @@ export default async function AdminLayout({
                     >
                         <QrCode className="h-4 w-4" />
                         Evangelism
+                    </Link>
+                    <Link
+                        href="/admin/sermons"
+                        className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                    >
+                        <Video className="h-4 w-4" />
+                        Sermons
+                    </Link>
+                    <Link
+                        href="/admin/visitors"
+                        className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                    >
+                        <UserCheck className="h-4 w-4" />
+                        Visitors
                     </Link>
                     <Link
                         href="/admin/qrcodes"

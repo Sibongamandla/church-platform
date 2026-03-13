@@ -1,52 +1,37 @@
+import { prisma } from "@/lib/prisma";
 import { SermonCard } from "./SermonCard";
 
-// Mock data
-const sermons = [
-    {
-        id: 1,
-        title: "Walking by Faith",
-        series: "Hebrews",
-        speaker: "Rev. David Smith",
-        date: "Oct 15, 2023",
-        thumbnail: "/thumbnails/hebrews-1.jpg",
-        slug: "walking-by-faith",
-    },
-    {
-        id: 2,
-        title: "The Power of Prayer",
-        series: "Stand Alone",
-        speaker: "Sarah Johnson",
-        date: "Oct 8, 2023",
-        thumbnail: "/thumbnails/prayer.jpg",
-        slug: "power-of-prayer",
-    },
-    {
-        id: 3,
-        title: "Community in Action",
-        series: "Life Together",
-        speaker: "Rev. David Smith",
-        date: "Oct 1, 2023",
-        thumbnail: "/thumbnails/community.jpg",
-        slug: "community-in-action",
-    },
-    {
-        id: 4,
-        title: "Grace Upon Grace",
-        series: "Gospel of John",
-        speaker: "Michael Chen",
-        date: "Sep 24, 2023",
-        thumbnail: "/thumbnails/grace.jpg",
-        slug: "grace-upon-grace",
-    },
-];
+export async function SermonsGrid() {
+    const sermons = await prisma.sermon.findMany({
+        orderBy: { date: "desc" },
+    });
 
-export function SermonsGrid() {
+    if (sermons.length === 0) {
+        return (
+            <section className="py-20 text-center">
+                <p className="text-muted-foreground">No sermons have been published yet. Check back soon!</p>
+            </section>
+        );
+    }
+
     return (
         <section className="py-12">
             <div className="container px-4 md:px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {sermons.map((sermon) => (
-                        <SermonCard key={sermon.id} sermon={sermon} />
+                        <SermonCard
+                            key={sermon.id}
+                            sermon={{
+                                id: sermon.id,
+                                title: sermon.title,
+                                series: sermon.series ?? "Stand Alone",
+                                speaker: sermon.speaker,
+                                date: sermon.date.toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" }),
+                                thumbnail: sermon.thumbnailUrl ?? "/thumbnails/default.jpg",
+                                slug: sermon.id,
+                                videoUrl: sermon.videoUrl,
+                            }}
+                        />
                     ))}
                 </div>
             </div>

@@ -2,25 +2,25 @@ import Link from "next/link";
 import { PlayCircle, Calendar, User } from "lucide-react";
 
 interface SermonProps {
-    id: number;
+    id: string;
     title: string;
     series: string;
     speaker: string;
     date: string;
     thumbnail: string;
     slug: string;
+    videoUrl?: string;
 }
 
 export function SermonCard({ sermon }: { sermon: SermonProps }) {
     return (
         <div className="group relative overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-md">
             <div className="aspect-video relative bg-muted overflow-hidden">
-                {/* Placeholder for Image */}
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-muted-foreground">
-                    Thumbnail: {sermon.title}
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                    <PlayCircle className="h-12 w-12 text-primary/40" />
                 </div>
 
-                {/* Overlay */}
+                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <PlayCircle className="h-12 w-12 text-white drop-shadow-lg" />
                 </div>
@@ -51,3 +51,4 @@ export function SermonCard({ sermon }: { sermon: SermonProps }) {
         </div>
     );
 }
+
