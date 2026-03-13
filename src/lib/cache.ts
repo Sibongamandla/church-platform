@@ -71,3 +71,17 @@ export const getCachedAnnouncements = unstable_cache(
         tags: [CACHE_TAGS.announcements],
     }
 );
+export const getLatestSermon = unstable_cache(
+    async () => {
+        return await prisma.sermon.findFirst({
+            orderBy: {
+                date: "desc",
+            },
+        });
+    },
+    ["latest-sermon"],
+    {
+        revalidate: REVALIDATE.MEDIUM,
+        tags: [CACHE_TAGS.sermons],
+    }
+);

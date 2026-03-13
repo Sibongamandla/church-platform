@@ -1,0 +1,20 @@
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import { SermonHighlightUI } from "@/components/admin/SermonHighlightUI";
+import { requireRole } from "@/lib/auth";
+
+export default async function SermonHighlightsPage({ params }: { params: { id: string } }) {
+    await requireRole("CONTENT_EDITOR");
+
+    const sermon = await (prisma as any).sermon.findUnique({
+        where: { id: params.id },
+    });
+
+    if (!sermon) notFound();
+
+    return (
+        <div className="py-12">
+            <SermonHighlightUI sermon={sermon} />
+        </div>
+    );
+}

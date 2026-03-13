@@ -16,10 +16,9 @@ model User {
   emailVerified DateTime?
   image         String?
   role          String    @default("MEMBER")
-  setupRequired Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
+  setupRequired Boolean   @default(false)
   memberProfile Member?
   sessions      Session[]
 }
@@ -33,70 +32,59 @@ model Session {
 }
 
 model Member {
-  id          String   @id @default(cuid())
-  firstName   String
-  lastName    String
-  email       String?
-  phone       String?
-  address     String?
-  birthday    DateTime?
-  gender      String?
-  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, ARCHIVED
-  
-  familyId    String?
-  family      Family?  @relation(fields: [familyId], references: [id])
-  
-  userId      String?  @unique
-  user        User?    @relation(fields: [userId], references: [id])
-  
-  attendance  Attendance[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  smartProfile SmartProfile?
-
+  id            String        @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String?
+  phone         String?
+  address       String?
+  birthday      DateTime?
+  gender        String?
+  status        String        @default("ACTIVE")
+  familyId      String?
+  userId        String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   recruitedById String?
-  recruitedBy   Member?  @relation("Recruitment", fields: [recruitedById], references: [id])
-  recruits      Member[] @relation("Recruitment")
+  attendance    Attendance[]
+  family        Family?       @relation(fields: [familyId], references: [id])
+  recruitedBy   Member?       @relation("Recruitment", fields: [recruitedById], references: [id])
+  recruits      Member[]      @relation("Recruitment")
+  user          User?         @relation(fields: [userId], references: [id])
+  smartProfile  SmartProfile?
 }
 
 model SmartProfile {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  bio         String?
-  avatarUrl   String?
-  instagram   String?
-  twitter     String?
-  linkedin    String?
-  whatsapp    String?
-  
-  memberId    String   @unique
-  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  bio       String?
+  avatarUrl String?
+  instagram String?
+  twitter   String?
+  linkedin  String?
+  whatsapp  String?
+  memberId  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 model Family {
   id        String   @id @default(cuid())
-  name      String   // e.g., "The Smith Family"
-  members   Member[]
-  
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  members   Member[]
 }
 
 model Attendance {
   id        String   @id @default(cuid())
   date      DateTime
-  serviceId String?  // Link to a specific service/event type (e.g. "Sunday Service")
-  eventId   String?  // Optional link to specific Event record
-  
+  serviceId String?
+  eventId   String?
   memberId  String
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  
   createdAt DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 model Event {
@@ -107,24 +95,27 @@ model Event {
   endDate     DateTime
   location    String?
   imageUrl    String?
+  isFeatured  Boolean  @default(false)
+  recapContent String? @db.Text
+  recapImages String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Announcement {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  date        DateTime
-  category    String   @default("General")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  date      DateTime
+  category  String   @default("General")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ShortLink {
   id        String   @id @default(cuid())
   slug      String   @unique
-  url       String   // Destination URL
+  url       String
   clicks    Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,22 +127,23 @@ model Sermon {
   speaker      String
   series       String?
   description  String?
-  videoUrl     String   // YouTube or Vimeo embed URL
-  thumbnailUrl String?  // Optional custom thumbnail
+  videoUrl     String
+  thumbnailUrl String?
   date         DateTime
+  highlightQuote String? @db.Text
+  highlightVideoUrl String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model ServiceSession {
-  id          String   @id @default(cuid())
-  name        String   // "Sunday Service", "Mid-week Service"
-  date        DateTime
-  headcount   Int
-  isArchived  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id @default(cuid())
+  name       String
+  date       DateTime
+  headcount  Int
+  isArchived Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@unique([name, date])
 }
-

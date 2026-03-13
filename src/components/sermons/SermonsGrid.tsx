@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { SermonCard } from "./SermonCard";
+import { format } from "date-fns";
 
 export async function SermonsGrid() {
-    const sermons = await prisma.sermon.findMany({
+    const sermons = await (prisma as any).sermon.findMany({
         orderBy: { date: "desc" },
     });
 
@@ -15,10 +16,10 @@ export async function SermonsGrid() {
     }
 
     return (
-        <section className="py-12">
+        <section className="py-20">
             <div className="container px-4 md:px-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {sermons.map((sermon) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    {sermons.map((sermon: any) => (
                         <SermonCard
                             key={sermon.id}
                             sermon={{
@@ -26,10 +27,11 @@ export async function SermonsGrid() {
                                 title: sermon.title,
                                 series: sermon.series ?? "Stand Alone",
                                 speaker: sermon.speaker,
-                                date: sermon.date.toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" }),
-                                thumbnail: sermon.thumbnailUrl ?? "/thumbnails/default.jpg",
+                                date: format(new Date(sermon.date), "MMM d, yyyy"),
+                                thumbnail: sermon.thumbnailUrl ?? "/pastor_preaching.png",
                                 slug: sermon.id,
                                 videoUrl: sermon.videoUrl,
+                                highlightQuote: sermon.highlightQuote,
                             }}
                         />
                     ))}

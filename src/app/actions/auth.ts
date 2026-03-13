@@ -48,7 +48,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     await createSession(user.id);
 
     // Check if the user needs to set their password (onboarding)
-    if (user.setupRequired) {
+    if ((user as any).setupRequired) {
         redirect("/setup-password");
     }
 
@@ -69,7 +69,7 @@ const setupSchema = z.object({
 
 export async function setupPasswordAction(prevState: any, formData: FormData) {
     const user = await getCurrentUser();
-    if (!user || !user.setupRequired) {
+    if (!user || !(user as any).setupRequired) {
         redirect("/login");
     }
 

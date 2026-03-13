@@ -4,7 +4,7 @@ import { Plus, Play, Calendar, Trash2, Pencil } from "lucide-react";
 import { deleteSermonAction } from "@/app/actions/sermons";
 
 export default async function SermonsAdminPage() {
-    const sermons = await prisma.sermon.findMany({
+    const sermons = await (prisma as any).sermon.findMany({
         orderBy: { date: "desc" },
     });
 
@@ -31,7 +31,7 @@ export default async function SermonsAdminPage() {
                         </p>
                     </div>
                 ) : (
-                    sermons.map((sermon) => (
+                    sermons.map((sermon: any) => (
                         <div
                             key={sermon.id}
                             className="flex items-start justify-between p-4 bg-card border rounded-lg shadow-sm"
@@ -64,6 +64,12 @@ export default async function SermonsAdminPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
+                                <Link
+                                    href={`/admin/sermons/${sermon.id}/highlights`}
+                                    className="px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
+                                >
+                                    Highlights
+                                </Link>
                                 <Link
                                     href={`/admin/sermons/${sermon.id}/edit`}
                                     className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"

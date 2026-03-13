@@ -144,6 +144,14 @@ export function EventsViewToggle({ events, deleteAction }: EventsViewToggleProps
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    {listTab === "past" && (
+                                        <Link
+                                            href={`/admin/events/${event.id}/recap`}
+                                            className="px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
+                                        >
+                                            Add Recap
+                                        </Link>
+                                    )}
                                     <Link
                                         href={`/admin/events/${event.id}/edit`}
                                         className="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors"

@@ -32,13 +32,13 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                     <div className="space-y-4">
                         <Link href="/" className="inline-block">
-                            <span className="text-2xl font-bold tracking-tighter text-foreground">
-                                GracePlatform
+                            <span className="text-2xl font-bold tracking-tighter text-foreground uppercase">
+                                Great Nation<span className="text-primary">Ministries</span>
                             </span>
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
                             A vibrant community dedicated to loving Jesus and loving people. Join
-                            us this Sunday for service.
+                            our family as we grow in faith together.
                         </p>
                         <div className="flex space-x-4 pt-2">
                             {footerNavigation.social.map((item) => (
@@ -113,8 +113,8 @@ export function Footer() {
                             </li>
                             <li className="flex items-center gap-3 text-sm text-muted-foreground">
                                 <Mail className="h-4 w-4 shrink-0 text-primary" />
-                                <a href="mailto:info@graceplatform.com" className="hover:text-primary">
-                                    info@graceplatform.com
+                                <a href="mailto:info@greatnationministries.com" className="hover:text-primary">
+                                    info@greatnationministries.com
                                 </a>
                             </li>
                         </ul>
@@ -122,8 +122,8 @@ export function Footer() {
                 </div>
 
                 <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-muted-foreground text-center md:text-left">
-                        &copy; {new Date().getFullYear()} GracePlatform. All rights reserved.
+                    <p className="text-xs text-muted-foreground text-center md:text-left font-medium">
+                        &copy; {new Date().getFullYear()} Great Nation Ministries. All rights reserved.
                     </p>
                     <div className="flex gap-6">
                         {footerNavigation.legal.map((item) => (
