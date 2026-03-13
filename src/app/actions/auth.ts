@@ -105,7 +105,11 @@ export async function loginAction(prevState: any, formData: FormData) {
     }
 
     await createSession(user.id);
-    // Redirect to dashboard (which handles both members and admins)
+
+    const adminRoles = ["SUPER_ADMIN", "CONTENT_EDITOR", "FINANCE_ADMIN", "REGISTRY_CLERK"];
+    if (adminRoles.includes(user.role)) {
+        redirect("/admin");
+    }
     redirect("/dashboard");
 }
 
