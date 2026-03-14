@@ -13,6 +13,8 @@ const sermonSchema = z.object({
     description: z.string().optional(),
     videoUrl: z.string().url("Must be a valid URL"),
     thumbnailUrl: z.string().url().optional().or(z.literal("")),
+    highlightQuote: z.string().optional(),
+    highlightVideoUrl: z.string().url().optional().or(z.literal("")),
     date: z.string().min(1, "Date is required"),
 });
 
@@ -24,7 +26,7 @@ export async function createSermonAction(formData: FormData): Promise<void> {
         console.error(parsed.error);
         return;
     }
-    const { title, speaker, series, description, videoUrl, thumbnailUrl, date } = parsed.data;
+    const { title, speaker, series, description, videoUrl, thumbnailUrl, highlightQuote, highlightVideoUrl, date } = parsed.data;
     await prisma.sermon.create({
         data: {
             title,
@@ -33,6 +35,8 @@ export async function createSermonAction(formData: FormData): Promise<void> {
             description: description || null,
             videoUrl,
             thumbnailUrl: thumbnailUrl || null,
+            highlightQuote: highlightQuote || null,
+            highlightVideoUrl: highlightVideoUrl || null,
             date: new Date(date),
         },
     });
@@ -50,7 +54,7 @@ export async function updateSermonAction(formData: FormData): Promise<void> {
         console.error(parsed.error);
         return;
     }
-    const { title, speaker, series, description, videoUrl, thumbnailUrl, date } = parsed.data;
+    const { title, speaker, series, description, videoUrl, thumbnailUrl, highlightQuote, highlightVideoUrl, date } = parsed.data;
     await prisma.sermon.update({
         where: { id },
         data: {
@@ -60,6 +64,8 @@ export async function updateSermonAction(formData: FormData): Promise<void> {
             description: description || null,
             videoUrl,
             thumbnailUrl: thumbnailUrl || null,
+            highlightQuote: highlightQuote || null,
+            highlightVideoUrl: highlightVideoUrl || null,
             date: new Date(date),
         },
     });

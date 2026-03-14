@@ -50,19 +50,42 @@ export default async function EditSermonPage({ params }: { params: Promise<{ id:
                         />
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <label htmlFor="videoUrl" className="text-sm font-medium">Video URL *</label>
-                    <input
-                        id="videoUrl" name="videoUrl" type="url" required defaultValue={sermon.videoUrl}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label htmlFor="thumbnailUrl" className="text-sm font-medium">Thumbnail URL (Optional)</label>
-                    <input
-                        id="thumbnailUrl" name="thumbnailUrl" type="url" defaultValue={sermon.thumbnailUrl || ""}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
+                <div className="space-y-4 border-t pt-5 mt-5">
+                    <h3 className="text-lg font-semibold">Media & Previews</h3>
+                    <div className="space-y-2">
+                        <label htmlFor="videoUrl" className="text-sm font-medium">Main Video URL *</label>
+                        <input
+                            id="videoUrl" name="videoUrl" type="url" required defaultValue={sermon.videoUrl}
+                            placeholder="https://test.com/video.mp4"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-2">
+                            <label htmlFor="thumbnailUrl" className="text-sm font-medium">Cover Image URL (Optional)</label>
+                            <input
+                                id="thumbnailUrl" name="thumbnailUrl" type="url" defaultValue={sermon.thumbnailUrl || ""}
+                                placeholder="https://..."
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="highlightVideoUrl" className="text-sm font-medium">Preview/Highlight Video URL</label>
+                            <input
+                                id="highlightVideoUrl" name="highlightVideoUrl" type="url" defaultValue={sermon.highlightVideoUrl || ""}
+                                placeholder="Short clip URL"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label htmlFor="highlightQuote" className="text-sm font-medium">Highlight Quote (Optional)</label>
+                        <input
+                            id="highlightQuote" name="highlightQuote" defaultValue={sermon.highlightQuote || ""}
+                            placeholder="A powerful statement..."
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                    </div>
                 </div>
                 <div className="space-y-2">
                     <label htmlFor="description" className="text-sm font-medium">Description (Optional)</label>

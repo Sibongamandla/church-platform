@@ -13,20 +13,25 @@ const eventSchema = z.object({
     startDate: z.string(), // ISO string from form
     endDate: z.string(),   // ISO string from form
     location: z.string().optional(),
+    imageUrl: z.string().url().optional().or(z.literal("")),
+    isFeatured: z.boolean().default(false),
 });
 
 export async function createEventAction(prevState: any, formData: FormData) {
     // Check auth
     await requireRole("SUPER_ADMIN"); // Or CONTENT_EDITOR
 
-    const data = Object.fromEntries(formData.entries());
+    const data = {
+        ...Object.fromEntries(formData.entries()),
+        isFeatured: formData.get("isFeatured") === "on",
+    };
     const parsed = eventSchema.safeParse(data);
 
     if (!parsed.success) {
         return { error: "Invalid input data" };
     }
 
-    const { title, description, startDate, endDate, location } = parsed.data;
+    const { title, description, startDate, endDate, location, imageUrl, isFeatured } = parsed.data;
 
     try {
         await prisma.event.create({
@@ -36,6 +41,8 @@ export async function createEventAction(prevState: any, formData: FormData) {
                 startDate: new Date(startDate),
                 endDate: new Date(endDate),
                 location,
+                imageUrl: imageUrl || null,
+                isFeatured,
             },
         });
         // revalidateTag(CACHE_TAGS.events);

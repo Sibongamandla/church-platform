@@ -7,28 +7,29 @@ import { Button } from "@/components/ui/button";
 import Marquee from "@/components/ui/marquee";
 import { cn } from "@/lib/utils";
 
-const slides = [
+const DEFAULT_SLIDES = [
     {
-        image: "/church_venue_exterior.png", // Paths will be set correctly below
+        imageUrl: "/church_venue_exterior.png",
         subtitle: "A Place of Worship",
         title: "Welcome Home",
         description: "Join our vibrant community as we grow in faith and love together."
     },
     {
-        image: "/worship_congregation.png",
+        imageUrl: "/worship_congregation.png",
         subtitle: "Faith in Action",
         title: "Be the Change",
         description: "Experience the power of community in our weekly gatherings."
     },
     {
-        image: "/pastor_preaching.png",
+        imageUrl: "/pastor_preaching.png",
         subtitle: "Empowering Message",
         title: "Grow in Grace",
         description: "Hear transformative messages that will inspire your spiritual journey."
     }
 ];
 
-export function HeroSection() {
+export function HeroSection({ initialSlides = [] }: { initialSlides?: any[] }) {
+    const slides = initialSlides.length > 0 ? initialSlides : DEFAULT_SLIDES;
     const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
@@ -75,7 +76,7 @@ export function HeroSection() {
                         </span>
                     </h1>
                     <p className="max-w-2xl mx-auto text-xl md:text-2xl text-muted-foreground font-medium leading-relaxed">
-                        {slides[currentSlide].description}
+                        {slides[currentSlide].description || slides[currentSlide].subtitle}
                     </p>
                 </div>
 
@@ -108,7 +109,7 @@ export function HeroSection() {
                             >
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                                 <img
-                                    src={slide.image}
+                                    src={slides[index].imageUrl}
                                     alt={slide.title}
                                     className="w-full h-full object-cover"
                                 />

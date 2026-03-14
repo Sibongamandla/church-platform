@@ -44,22 +44,43 @@ export default function NewSermonPage() {
                         />
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <label htmlFor="videoUrl" className="text-sm font-medium">Video URL *</label>
-                    <input
-                        id="videoUrl" name="videoUrl" type="url" required
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                    <p className="text-xs text-muted-foreground">Paste a YouTube or Vimeo link.</p>
-                </div>
-                <div className="space-y-2">
-                    <label htmlFor="thumbnailUrl" className="text-sm font-medium">Thumbnail URL (Optional)</label>
-                    <input
-                        id="thumbnailUrl" name="thumbnailUrl" type="url"
-                        placeholder="https://..."
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
+                <div className="space-y-4 border-t pt-5 mt-5">
+                    <h3 className="text-lg font-semibold">Media & Previews</h3>
+                    <div className="space-y-2">
+                        <label htmlFor="videoUrl" className="text-sm font-medium">Main Video URL *</label>
+                        <input
+                            id="videoUrl" name="videoUrl" type="url" required
+                            placeholder="https://www.youtube.com/watch?v=... or direct MP4 link"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                        <p className="text-xs text-muted-foreground">YouTube, Vimeo, or direct video file links.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-2">
+                            <label htmlFor="thumbnailUrl" className="text-sm font-medium">Cover Image URL (Optional)</label>
+                            <input
+                                id="thumbnailUrl" name="thumbnailUrl" type="url"
+                                placeholder="https://..."
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="highlightVideoUrl" className="text-sm font-medium">Preview/Highlight Video URL</label>
+                            <input
+                                id="highlightVideoUrl" name="highlightVideoUrl" type="url"
+                                placeholder="Short clip URL (MP4 recommended)"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label htmlFor="highlightQuote" className="text-sm font-medium">Highlight Quote (Optional)</label>
+                        <input
+                            id="highlightQuote" name="highlightQuote"
+                            placeholder="A powerful statement from the sermon..."
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                    </div>
                 </div>
                 <div className="space-y-2">
                     <label htmlFor="description" className="text-sm font-medium">Description (Optional)</label>

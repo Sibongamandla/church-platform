@@ -11,6 +11,7 @@ const announcementSchema = z.object({
     title: z.string().min(3),
     content: z.string().min(5),
     date: z.string(), // ISO string from form
+    imageUrl: z.string().url().optional().or(z.literal("")),
     category: z.string().default("General"),
 });
 
@@ -24,7 +25,7 @@ export async function createAnnouncementAction(prevState: any, formData: FormDat
         return { error: "Invalid input data" };
     }
 
-    const { title, content, date, category } = parsed.data;
+    const { title, content, date, imageUrl, category } = parsed.data;
 
     try {
         await prisma.announcement.create({
@@ -32,6 +33,7 @@ export async function createAnnouncementAction(prevState: any, formData: FormDat
                 title,
                 content,
                 date: new Date(date),
+                imageUrl: imageUrl || null,
                 category,
             },
         });

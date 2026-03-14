@@ -73,6 +73,19 @@ export default function NewAnnouncementPage() {
                     </div>
 
                     <div className="space-y-2">
+                        <label htmlFor="imageUrl" className="text-sm font-medium">
+                            Image URL (Optional)
+                        </label>
+                        <input
+                            id="imageUrl"
+                            name="imageUrl"
+                            type="url"
+                            className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="https://..."
+                        />
+                    </div>
+
+                    <div className="space-y-2">
                         <label htmlFor="content" className="text-sm font-medium">
                             Content
                         </label>

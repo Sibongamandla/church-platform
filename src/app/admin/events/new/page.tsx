@@ -81,6 +81,31 @@ export default function NewEventPage() {
                     </div>
 
                     <div className="space-y-2">
+                        <label htmlFor="imageUrl" className="text-sm font-medium">
+                            Image URL (Optional)
+                        </label>
+                        <input
+                            id="imageUrl"
+                            name="imageUrl"
+                            type="url"
+                            className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="https://..."
+                        />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="isFeatured"
+                            name="isFeatured"
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <label htmlFor="isFeatured" className="text-sm font-medium">
+                            Feature this event on homepage
+                        </label>
+                    </div>
+
+                    <div className="space-y-2">
                         <label htmlFor="description" className="text-sm font-medium">
                             Description
                         </label>
