@@ -76,9 +76,20 @@ export default async function AttendanceHistoryPage() {
                         ) : (
                             sessions.map((session: any) => (
                                 <tr key={session.id} className="border-b hover:bg-muted/30 transition-colors">
-                                    <td className="p-4 align-middle font-medium">{session.name}</td>
-                                    <td className="p-4 align-middle text-muted-foreground">
-                                        {session.date.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                                    <td className="p-4 align-middle font-medium">
+                                        <div>{session.name}</div>
+                                        <div className="text-[10px] text-muted-foreground uppercase">
+                                            {session.type}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 align-middle">
+                                        <div className="text-sm">
+                                            {session.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                                            {session.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
                                     </td>
                                     <td className="p-4 align-middle font-bold text-lg">{session.headcount}</td>
                                     <td className="p-4 align-middle text-right text-xs">

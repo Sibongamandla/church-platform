@@ -47,8 +47,11 @@ export async function GET(request: Request) {
                     create: {
                         name: sessionName,
                         date: dayStart,
+                        startTime: dayStart, // Placeholder for archived
+                        endTime: dayEnd,
                         headcount: count,
-                        isArchived: true
+                        isArchived: true,
+                        type: "AUTOMATIC"
                     }
                 });
                 results.push(session);

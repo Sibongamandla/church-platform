@@ -1,23 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { getCurrentSessionName, getSessionDateRange } from "@/lib/sessions";
+import { getActiveSession } from "@/lib/sessions";
 import Link from "next/link";
-import { Calendar, CheckCircle, Users, QrCode, Clock } from "lucide-react";
+import { Calendar, CheckCircle, Users, QrCode, Clock, Plus } from "lucide-react";
 
 export default async function AttendanceDashboard() {
     const today = new Date();
-    const sessionName = getCurrentSessionName(today);
-    const { start, end } = getSessionDateRange(today);
+    const activeSession = await getActiveSession(today);
 
     // Get attendance for today's session
-    const todayAttendance = await prisma.attendance.count({
-        where: {
-            date: {
-                gte: start,
-                lte: end,
-            },
-            serviceId: sessionName,
-        },
-    });
+    const todayAttendance = activeSession ? activeSession.headcount : 0;
+    const sessionName = activeSession ? activeSession.name : "No Active Session";
 
     // Get recent attendance records
     const recentRecords = await prisma.attendance.findMany({
@@ -38,6 +30,13 @@ export default async function AttendanceDashboard() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Link
+                        href="/admin/attendance/manual"
+                        className="inline-flex items-center justify-center rounded-md border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Manual Session
+                    </Link>
                     <Link
                         href="/admin/attendance/history"
                         className="inline-flex items-center justify-center rounded-md border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
