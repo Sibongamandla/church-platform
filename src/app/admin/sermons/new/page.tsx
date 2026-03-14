@@ -1,3 +1,5 @@
+"use client";
+
 import { createSermonAction } from "@/app/actions/sermons";
 import { useState, useActionState } from "react";
 import { ImageUpload } from "@/components/ui/ImageUpload";
