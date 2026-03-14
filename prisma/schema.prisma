@@ -8,6 +8,11 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
+enum SessionType {
+  AUTOMATIC
+  MANUAL
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -78,13 +83,15 @@ model Family {
 }
 
 model Attendance {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   date      DateTime
   serviceId String?
   eventId   String?
   memberId  String
-  createdAt DateTime @default(now())
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionId String?
+  createdAt DateTime        @default(now())
+  member    Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  session   ServiceSession? @relation(fields: [sessionId], references: [id])
 }
 
 model Event {
@@ -137,13 +144,17 @@ model Sermon {
 }
 
 model ServiceSession {
-  id         String   @id @default(cuid())
+  id         String       @id @default(cuid())
   name       String
-  date       DateTime
-  headcount  Int
-  isArchived Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  date       DateTime     @db.Date
+  startTime  DateTime
+  endTime    DateTime
+  headcount  Int          @default(0)
+  isArchived Boolean      @default(false)
+  type       SessionType  @default(AUTOMATIC)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  attendance Attendance[]
 
   @@unique([name, date])
 }
