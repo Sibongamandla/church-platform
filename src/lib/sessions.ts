@@ -1,4 +1,4 @@
-import { startOfDay, endOfDay, isSunday, isWednesday } from "date-fns";
+import { startOfDay, endOfDay, isSunday, isWednesday, isFriday } from "date-fns";
 
 export function getCurrentSessionName(date: Date = new Date()): string {
     if (isSunday(date)) {
@@ -6,6 +6,9 @@ export function getCurrentSessionName(date: Date = new Date()): string {
     }
     if (isWednesday(date)) {
         return "Mid-week Service";
+    }
+    if (isFriday(date)) {
+        return "Friday Service";
     }
     return "Special Event";
 }
