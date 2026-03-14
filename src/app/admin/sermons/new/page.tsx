@@ -1,6 +1,11 @@
 import { createSermonAction } from "@/app/actions/sermons";
+import { useState, useActionState } from "react";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+import { Loader2 } from "lucide-react";
 
 export default function NewSermonPage() {
+    const [state, action, isPending] = useActionState(createSermonAction, null);
+    const [thumbnailUrl, setThumbnailUrl] = useState("");
     return (
         <div className="max-w-2xl space-y-6">
             <div>
@@ -8,7 +13,13 @@ export default function NewSermonPage() {
                 <p className="text-muted-foreground mt-1">Fill in the details to publish a sermon to the website.</p>
             </div>
 
-            <form action={createSermonAction} className="bg-card border rounded-xl p-6 space-y-5 shadow-sm">
+            <form action={action} className="bg-card border rounded-xl p-6 space-y-5 shadow-sm">
+                {state?.error && (
+                    <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive font-medium">
+                        {state.error}
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                         <label htmlFor="title" className="text-sm font-medium">Title *</label>
@@ -57,12 +68,13 @@ export default function NewSermonPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-2">
-                            <label htmlFor="thumbnailUrl" className="text-sm font-medium">Cover Image URL (Optional)</label>
-                            <input
-                                id="thumbnailUrl" name="thumbnailUrl" type="url"
-                                placeholder="https://..."
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            <label className="text-sm font-medium">Cover Image (Optional)</label>
+                            <ImageUpload 
+                                value={thumbnailUrl} 
+                                onChange={setThumbnailUrl} 
+                                placeholder="Upload sermon cover image"
                             />
+                            <input type="hidden" name="thumbnailUrl" value={thumbnailUrl} />
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="highlightVideoUrl" className="text-sm font-medium">Preview/Highlight Video URL</label>
@@ -93,9 +105,17 @@ export default function NewSermonPage() {
                 <div className="flex gap-3 pt-2">
                     <button
                         type="submit"
-                        className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+                        disabled={isPending}
+                        className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:opacity-50"
                     >
-                        Publish Sermon
+                        {isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Publishing...
+                            </>
+                        ) : (
+                            "Publish Sermon"
+                        )}
                     </button>
                     <a href="/admin/sermons" className="inline-flex items-center justify-center rounded-md border px-6 py-2 text-sm font-medium transition-colors hover:bg-muted">
                         Cancel

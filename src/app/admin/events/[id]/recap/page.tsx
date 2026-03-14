@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import { EventRecapUI } from "@/components/admin/EventRecapUI";
 import { requireRole } from "@/lib/auth";
 
-export default async function EventRecapPage({ params }: { params: { id: string } }) {
+export default async function EventRecapPage({ params }: { params: Promise<{ id: string }> }) {
     await requireRole("CONTENT_EDITOR");
+    const { id } = await params;
 
     const event = await (prisma as any).event.findUnique({
-        where: { id: params.id },
+        where: { id },
     });
 
     if (!event) notFound();

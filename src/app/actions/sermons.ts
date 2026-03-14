@@ -18,61 +18,70 @@ const sermonSchema = z.object({
     date: z.string().min(1, "Date is required"),
 });
 
-export async function createSermonAction(formData: FormData): Promise<void> {
+type SermonState = { error?: string } | null;
+
+export async function createSermonAction(prevState: SermonState, formData: FormData): Promise<SermonState> {
     await requireRole("SUPER_ADMIN");
     const data = Object.fromEntries(formData.entries());
     const parsed = sermonSchema.safeParse(data);
     if (!parsed.success) {
-        console.error(parsed.error);
-        return;
+        return { error: "Invalid input data" };
     }
     const { title, speaker, series, description, videoUrl, thumbnailUrl, highlightQuote, highlightVideoUrl, date } = parsed.data;
-    await prisma.sermon.create({
-        data: {
-            title,
-            speaker,
-            series: series || null,
-            description: description || null,
-            videoUrl,
-            thumbnailUrl: thumbnailUrl || null,
-            highlightQuote: highlightQuote || null,
-            highlightVideoUrl: highlightVideoUrl || null,
-            date: new Date(date),
-        },
-    });
+    try {
+        await prisma.sermon.create({
+            data: {
+                title,
+                speaker,
+                series: series || null,
+                description: description || null,
+                videoUrl,
+                thumbnailUrl: thumbnailUrl || null,
+                highlightQuote: highlightQuote || null,
+                highlightVideoUrl: highlightVideoUrl || null,
+                date: new Date(date),
+            },
+        });
+    } catch (error) {
+        return { error: "Failed to create sermon" };
+    }
     revalidatePath("/admin/sermons");
     revalidatePath("/sermons");
     redirect("/admin/sermons");
 }
 
-export async function updateSermonAction(formData: FormData): Promise<void> {
+export async function updateSermonAction(prevState: SermonState, formData: FormData): Promise<SermonState> {
     await requireRole("SUPER_ADMIN");
     const id = formData.get("id") as string;
     const data = Object.fromEntries(formData.entries());
     const parsed = sermonSchema.safeParse(data);
     if (!parsed.success) {
-        console.error(parsed.error);
-        return;
+        return { error: "Invalid input data" };
     }
     const { title, speaker, series, description, videoUrl, thumbnailUrl, highlightQuote, highlightVideoUrl, date } = parsed.data;
-    await prisma.sermon.update({
-        where: { id },
-        data: {
-            title,
-            speaker,
-            series: series || null,
-            description: description || null,
-            videoUrl,
-            thumbnailUrl: thumbnailUrl || null,
-            highlightQuote: highlightQuote || null,
-            highlightVideoUrl: highlightVideoUrl || null,
-            date: new Date(date),
-        },
-    });
+    try {
+        await prisma.sermon.update({
+            where: { id },
+            data: {
+                title,
+                speaker,
+                series: series || null,
+                description: description || null,
+                videoUrl,
+                thumbnailUrl: thumbnailUrl || null,
+                highlightQuote: highlightQuote || null,
+                highlightVideoUrl: highlightVideoUrl || null,
+                date: new Date(date),
+            },
+        });
+    } catch (error) {
+        return { error: "Failed to update sermon" };
+    }
     revalidatePath("/admin/sermons");
     revalidatePath("/sermons");
     redirect("/admin/sermons");
 }
+
 
 export async function deleteSermonAction(formData: FormData): Promise<void> {
     await requireRole("SUPER_ADMIN");

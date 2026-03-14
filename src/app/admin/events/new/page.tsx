@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createEventAction } from "@/app/actions/events";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
 export default function NewEventPage() {
     const [state, action, isPending] = useActionState(createEventAction, null);
+    const [imageUrl, setImageUrl] = useState("");
 
     return (
         <div className="space-y-6">
@@ -81,16 +83,15 @@ export default function NewEventPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="imageUrl" className="text-sm font-medium">
-                            Image URL (Optional)
+                        <label className="text-sm font-medium">
+                            Event Cover Image
                         </label>
-                        <input
-                            id="imageUrl"
-                            name="imageUrl"
-                            type="url"
-                            className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                            placeholder="https://..."
+                        <ImageUpload 
+                            value={imageUrl} 
+                            onChange={setImageUrl} 
+                            placeholder="Upload event cover image"
                         />
+                        <input type="hidden" name="imageUrl" value={imageUrl} />
                     </div>
 
                     <div className="flex items-center space-x-2">

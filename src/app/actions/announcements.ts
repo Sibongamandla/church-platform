@@ -58,3 +58,36 @@ export async function deleteAnnouncementAction(formData: FormData) {
 
     revalidatePath("/admin/announcements");
 }
+
+export async function updateAnnouncementAction(prevState: any, formData: FormData) {
+    await requireRole("SUPER_ADMIN");
+
+    const id = formData.get("id") as string;
+    const data = Object.fromEntries(formData.entries());
+    const parsed = announcementSchema.safeParse(data);
+
+    if (!parsed.success) {
+        return { error: "Invalid input data" };
+    }
+
+    const { title, content, date, imageUrl, category } = parsed.data;
+
+    try {
+        await prisma.announcement.update({
+            where: { id },
+            data: {
+                title,
+                content,
+                date: new Date(date),
+                imageUrl: imageUrl || null,
+                category,
+            },
+        });
+    } catch (error) {
+        return { error: "Failed to update announcement" };
+    }
+
+    revalidatePath("/admin/announcements");
+    redirect("/admin/announcements");
+}
+

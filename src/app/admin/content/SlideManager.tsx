@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import { Plus, Trash2, Edit2, Save, X, MoveUp, MoveDown } from "lucide-react";
 import { upsertHomeSlideAction, deleteHomeSlideAction } from "@/app/actions/content";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+import { useEffect } from "react";
 
 const initialState: { error?: string; success?: boolean } = {};
 
@@ -10,6 +12,15 @@ export function SlideManager({ initialSlides }: { initialSlides: any[] }) {
     const [isAdding, setIsAdding] = useState(false);
     const [editingSlide, setEditingSlide] = useState<any>(null);
     const [state, formAction, isPending] = useActionState(upsertHomeSlideAction, initialState);
+    const [imageUrl, setImageUrl] = useState("");
+
+    useEffect(() => {
+        if (editingSlide) {
+            setImageUrl(editingSlide.imageUrl);
+        } else {
+            setImageUrl("");
+        }
+    }, [editingSlide]);
 
     const handleEdit = (slide: any) => {
         setEditingSlide(slide);
@@ -57,13 +68,18 @@ export function SlideManager({ initialSlides }: { initialSlides: any[] }) {
                                 className="w-full rounded-md border p-2 focus:ring-2 focus:ring-primary outline-none"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Image URL</label>
+                        <div className="space-y-2 md:col-span-2">
+                            <label className="text-sm font-medium">Slide Image</label>
+                            <ImageUpload 
+                                value={imageUrl} 
+                                onChange={setImageUrl} 
+                                placeholder="Upload slide image"
+                            />
                             <input
+                                type="hidden"
                                 name="imageUrl"
-                                defaultValue={editingSlide?.imageUrl}
+                                value={imageUrl}
                                 required
-                                className="w-full rounded-md border p-2 focus:ring-2 focus:ring-primary outline-none"
                             />
                         </div>
                         <div className="space-y-2">

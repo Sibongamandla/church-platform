@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Calendar, Tag, Trash2 } from "lucide-react";
+import { Plus, Calendar, Tag, Trash2, Edit2 } from "lucide-react";
 import { deleteAnnouncementAction } from "@/app/actions/announcements";
 
 export default async function AnnouncementsAdminPage() {
@@ -53,6 +53,13 @@ export default async function AnnouncementsAdminPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
+                                <Link
+                                    href={`/admin/announcements/${item.id}/edit`}
+                                    className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
+                                >
+                                    <span className="sr-only">Edit</span>
+                                    <Edit2 className="h-4 w-4" />
+                                </Link>
                                 <form action={deleteAnnouncementAction}>
                                     <input type="hidden" name="id" value={item.id} />
                                     <button
