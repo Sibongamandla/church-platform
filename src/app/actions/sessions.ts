@@ -10,7 +10,18 @@ const sessionSchema = z.object({
     endTime: z.string().min(1, "End time is required"),
 });
 
-export async function createManualSessionAction(formData: FormData) {
+export type ManualSessionState = {
+    success?: boolean;
+    message?: string;
+    errors?: {
+        name?: string[];
+        date?: string[];
+        startTime?: string[];
+        endTime?: string[];
+    };
+};
+
+export async function createManualSessionAction(prevState: ManualSessionState, formData: FormData): Promise<ManualSessionState> {
     const data = Object.fromEntries(formData.entries());
     const parsed = sessionSchema.safeParse(data);
 
