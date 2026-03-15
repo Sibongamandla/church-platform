@@ -75,27 +75,38 @@ export default async function AttendanceHistoryPage() {
                             </tr>
                         ) : (
                             sessions.map((session: any) => (
-                                <tr key={session.id} className="border-b hover:bg-muted/30 transition-colors">
-                                    <td className="p-4 align-middle font-medium">
-                                        <div>{session.name}</div>
-                                        <div className="text-[10px] text-muted-foreground uppercase">
-                                            {session.type}
-                                        </div>
+                                <tr key={session.id} className="border-b hover:bg-muted/50 transition-colors group">
+                                    <td className="p-4 align-middle">
+                                        <Link 
+                                            href={`/admin/attendance/history/${session.id}`}
+                                            className="block hover:underline"
+                                        >
+                                            <div className="font-semibold text-primary group-hover:underline">{session.name}</div>
+                                            <div className="text-[10px] text-muted-foreground uppercase">
+                                                {session.type}
+                                            </div>
+                                        </Link>
                                     </td>
                                     <td className="p-4 align-middle">
-                                        <div className="text-sm">
-                                            {session.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                                            {session.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </div>
+                                        <Link href={`/admin/attendance/history/${session.id}`} className="block">
+                                            <div className="text-sm">
+                                                {session.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                                                {session.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </Link>
                                     </td>
-                                    <td className="p-4 align-middle font-bold text-lg">{session.headcount}</td>
+                                    <td className="p-4 align-middle">
+                                        <Link href={`/admin/attendance/history/${session.id}`} className="block">
+                                            <div className="font-bold text-lg">{session.headcount}</div>
+                                        </Link>
+                                    </td>
                                     <td className="p-4 align-middle text-right text-xs">
-                                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-800">
-                                            Archived
-                                        </span>
+                                        <Link href={`/admin/attendance/history/${session.id}`} className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-800 hover:bg-green-200 transition-colors">
+                                            View Details
+                                        </Link>
                                     </td>
                                 </tr>
                             ))
