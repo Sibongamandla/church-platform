@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getCurrentSessionName } from "@/lib/sessions";
+import { getCurrentSessionName, getActiveSession } from "@/lib/sessions";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { redirect } from "next/navigation";
@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 export async function checkInMultipleMembersAction(memberIds: string[]) {
     const today = new Date();
     const sessionName = getCurrentSessionName(today);
+    const activeSession = await getActiveSession(today);
 
     try {
         // Filter out already checked-in members
@@ -20,8 +21,8 @@ export async function checkInMultipleMembersAction(memberIds: string[]) {
                 memberId: { in: memberIds },
                 serviceId: sessionName,
                 date: {
-                    gte: new Date(today.setHours(0, 0, 0, 0)),
-                    lt: new Date(today.setHours(23, 59, 59, 999)),
+                    gte: new Date(new Date(today).setHours(0, 0, 0, 0)),
+                    lt: new Date(new Date(today).setHours(23, 59, 59, 999)),
                 }
             },
             select: { memberId: true }
@@ -34,17 +35,32 @@ export async function checkInMultipleMembersAction(memberIds: string[]) {
              return { success: true, message: "Everyone was already checked in." };
         }
 
+        // Create attendance records
         await prisma.attendance.createMany({
             data: toCheckIn.map(memberId => ({
                 date: new Date(),
                 serviceId: sessionName,
                 memberId,
+                sessionId: activeSession?.id || null,
             }))
         });
+
+        // Update headcount if there's an active session
+        if (activeSession) {
+            await prisma.serviceSession.update({
+                where: { id: activeSession.id },
+                data: {
+                    headcount: {
+                        increment: toCheckIn.length
+                    }
+                }
+            });
+        }
 
         revalidatePath("/admin/attendance");
         return { success: true, message: "Check-in successful!" };
     } catch (e) {
+        console.error("Check-in error:", e);
         return { error: "Check-in failed." };
     }
 }
