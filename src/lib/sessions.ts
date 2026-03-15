@@ -36,7 +36,7 @@ export async function getActiveSession(date: Date = new Date()) {
         sessionStart.setHours(hours, minutes, 0, 0);
 
         const windowOpen = subMinutes(sessionStart, 30);
-        const windowClose = addMinutes(sessionStart, 60);
+        const windowClose = addMinutes(sessionStart, 240); // 4 hour window
 
         if (isAfter(date, windowOpen) && isBefore(date, windowClose)) {
             // Find or create the automatic session record for today
