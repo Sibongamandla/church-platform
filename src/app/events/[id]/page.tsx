@@ -6,9 +6,10 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export default async function EventDetailPage({ params }: { params: { id: string } }) {
+export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const rawEvent = await prisma.event.findUnique({
-        where: { id: params.id },
+        where: { id },
     });
 
     if (!rawEvent) notFound();

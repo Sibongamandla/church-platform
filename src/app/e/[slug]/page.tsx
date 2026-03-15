@@ -39,7 +39,7 @@ export default async function SmartProfilePage({
                             <img src={profile.avatarUrl} alt={profile.slug} className="h-full w-full object-cover" />
                         ) : (
                             <span className="text-5xl font-heading font-bold text-muted-foreground">
-                                {profile.member.firstName[0]}{profile.member.lastName[0]}
+                                {(profile.member.firstName?.[0] || 'G')}{(profile.member.lastName?.[0] || 'N')}
                             </span>
                         )}
                     </div>

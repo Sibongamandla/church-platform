@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, Calendar, Clock, CheckCircle } from "lucide-react";
 
-export default async function SessionDetailsPage({ params }: { params: { id: string } }) {
+export default async function SessionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await prisma.serviceSession.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             attendance: {
                 include: {
@@ -86,7 +87,7 @@ export default async function SessionDetailsPage({ params }: { params: { id: str
                             <div key={record.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                        {record.member.firstName[0]}{record.member.lastName[0]}
+                                        {(record.member.firstName?.[0] || 'A')}{(record.member.lastName?.[0] || 'M')}
                                     </div>
                                     <div>
                                         <p className="font-medium text-sm">{record.member.firstName} {record.member.lastName}</p>
