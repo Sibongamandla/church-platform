@@ -62,3 +62,51 @@ export async function deleteHomeSlideAction(id: string) {
         return { error: "Failed to delete slide." };
     }
 }
+
+// ==========================================
+// SITE MEDIA (BACKGROUNDS & STATIC ASSETS)
+// ==========================================
+
+export async function upsertSiteMediaAction(prevState: any, formData: FormData) {
+    const key = formData.get("key") as string;
+    const url = formData.get("url") as string;
+    const label = formData.get("label") as string;
+
+    if (!key || !url || !label) {
+        return { error: "Key, Label, and URL are required." };
+    }
+
+    try {
+        await prisma.siteMedia.upsert({
+            where: { key },
+            update: { url, label },
+            create: { key, url, label },
+        });
+
+        revalidatePath("/");
+        revalidatePath("/sermons");
+        revalidatePath("/events");
+        revalidatePath("/admin/content");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to save site media:", error);
+        return { error: "Failed to save media." };
+    }
+}
+
+export async function getSiteMedia(keys: string[]) {
+    try {
+        const media = await prisma.siteMedia.findMany({
+            where: { key: { in: keys } }
+        });
+        
+        // Return a key-value map for easier frontend consumption
+        return media.reduce((acc, item) => {
+            acc[item.key] = item.url;
+            return acc;
+        }, {} as Record<string, string>);
+    } catch (error) {
+        console.error("Failed to fetch site media:", error);
+        return {};
+    }
+}

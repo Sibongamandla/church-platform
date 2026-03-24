@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Calendar, MapPin, Clock, Image as ImageIcon, Sparkles, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getSiteMedia } from "@/app/actions/content";
 
 export const metadata = {
     title: "Gatherings & Memories | Great Nation Ministries",
@@ -12,12 +13,18 @@ export default async function EventsPage() {
     const upcomingEvents = await getAllUpcomingEvents();
     const pastEventsRaw = await getPastEvents();
     const pastEvents = pastEventsRaw as any[];
+    
+    const media = await getSiteMedia(["events_header_bg"]);
+    const headerBg = media["events_header_bg"] || "/church_venue_exterior.png";
 
     return (
         <div className="min-h-screen bg-background pb-32">
             {/* Massive Header Section */}
             <div className="relative py-32 md:py-48 flex flex-col items-center justify-center text-center overflow-hidden bg-neutral-900 text-white">
-                <div className="absolute inset-0 bg-[url('/church_venue_exterior.png')] bg-cover bg-center opacity-30 mix-blend-overlay scale-110" />
+                <div 
+                    className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay scale-110" 
+                    style={{ backgroundImage: `url('${headerBg}')` }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/80 via-transparent to-background pointer-events-none" />
                 
                 <div className="container relative z-10 px-4 space-y-8 animate-fade-in-up">

@@ -4,6 +4,7 @@ import { Announcements } from "@/components/home/Announcements";
 import { EventsPreview } from "@/components/home/EventsPreview";
 import { LatestSermon } from "@/components/home/LatestSermon";
 import { getCachedEvents, getLatestSermon } from "@/lib/cache";
+import { getSiteMedia } from "@/app/actions/content";
 
 export default async function Home() {
   const events = await getCachedEvents();
@@ -13,12 +14,25 @@ export default async function Home() {
     orderBy: { order: "asc" }
   });
 
+  const media = await getSiteMedia([
+    "home_events_preview_bg",
+    "home_latest_sermon_bg"
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <HeroSection initialSlides={slides} />
       <Announcements />
-      {latestSermon && <LatestSermon sermon={latestSermon as any} />}
-      <EventsPreview events={events} />
+      {latestSermon && (
+        <LatestSermon 
+          sermon={latestSermon as any} 
+          bgImage={media["home_latest_sermon_bg"]}
+        />
+      )}
+      <EventsPreview 
+        events={events} 
+        bgImage={media["home_events_preview_bg"]}
+      />
     </div>
   );
 }

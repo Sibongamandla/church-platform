@@ -1,16 +1,23 @@
 import { SermonsGrid } from "@/components/sermons/SermonsGrid";
-import { Sparkles, Play } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { getSiteMedia } from "@/app/actions/content";
 
 export const metadata = {
     title: "Messages & Wisdom | Great Nation Ministries",
 };
 
-export default function SermonsPage() {
+export default async function SermonsPage() {
+    const media = await getSiteMedia(["sermons_header_bg"]);
+    const headerBg = media["sermons_header_bg"] || "/pastor_preaching.png";
+
     return (
         <div className="min-h-screen bg-background pb-32">
             {/* Cinematic Header */}
             <div className="relative py-32 md:py-48 flex flex-col items-center justify-center text-center overflow-hidden bg-neutral-950 text-white">
-                <div className="absolute inset-0 bg-[url('/pastor_preaching.png')] bg-cover bg-center opacity-20 contrast-125 grayscale" />
+                <div 
+                    className="absolute inset-0 bg-cover bg-center opacity-20 contrast-125 grayscale" 
+                    style={{ backgroundImage: `url('${headerBg}')` }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-background pointer-events-none" />
                 
                 <div className="container relative z-10 px-4 space-y-8 animate-fade-in-up">

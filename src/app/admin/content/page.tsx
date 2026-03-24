@@ -1,10 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { SlideManager } from "./SlideManager";
+import { MediaManager } from "./MediaManager";
 
 export default async function ContentManagementPage() {
     const slides = await prisma.homeSlide.findMany({
         orderBy: { order: "asc" }
     });
+
+    const mediaList = await prisma.siteMedia.findMany();
+    const mediaMap = mediaList.reduce((acc, item) => {
+        acc[item.key] = item.url;
+        return acc;
+    }, {} as Record<string, string>);
 
     return (
         <div className="max-w-7xl mx-auto p-8 space-y-12">
@@ -13,7 +20,13 @@ export default async function ContentManagementPage() {
                 <p className="text-muted-foreground mt-1">Manage dynamic content for the frontend website</p>
             </div>
 
-            <SlideManager initialSlides={slides} />
+            <section className="space-y-12">
+                <SlideManager initialSlides={slides} />
+                
+                <div className="pt-12 border-t">
+                    <MediaManager initialMedia={mediaMap} />
+                </div>
+            </section>
             
             <div className="pt-8 border-t">
                 <h2 className="text-2xl font-bold mb-4">Content Guidelines</h2>

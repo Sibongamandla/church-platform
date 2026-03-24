@@ -138,3 +138,59 @@ export async function joinTeamAction(teamId: string) {
         return { error: "Failed to join team" };
     }
 }
+
+export type VolunteerData = {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+};
+
+export async function publicJoinTeamAction(teamId: string, memberId?: string, data?: VolunteerData) {
+    try {
+        let finalMemberId = memberId;
+
+        // If no memberId, we create/find by phone (Quick Form)
+        if (!finalMemberId && data) {
+            const existing = await prisma.member.findFirst({
+                where: { phone: data.phone }
+            });
+
+            if (existing) {
+                finalMemberId = existing.id;
+            } else {
+                const newMember = await prisma.member.create({
+                    data: {
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        phone: data.phone,
+                        email: data.email || null,
+                        status: "ACTIVE",
+                    }
+                });
+                finalMemberId = newMember.id;
+            }
+        }
+
+        if (!finalMemberId) return { error: "Missing identity information" };
+
+        await prisma.teamMember.upsert({
+            where: {
+                teamId_memberId: { teamId, memberId: finalMemberId }
+            },
+            update: {}, // Already joined
+            create: {
+                teamId,
+                memberId: finalMemberId,
+                roleId: null,
+            }
+        });
+
+        revalidatePath("/volunteer");
+        revalidatePath(`/admin/volunteers/${teamId}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Public volunteer error:", error);
+        return { error: "Something went wrong while signing you up." };
+    }
+}

@@ -16,8 +16,9 @@ interface Sermon {
     highlightVideoUrl?: string | null;
 }
 
-export function LatestSermon({ sermon }: { sermon: Sermon }) {
+export function LatestSermon({ sermon, bgImage }: { sermon: Sermon, bgImage?: string }) {
     if (!sermon) return null;
+    const displayBg = bgImage || "/pastor_preaching.png";
 
     return (
         <section className="py-24 bg-neutral-950 text-white overflow-hidden relative">
@@ -77,7 +78,7 @@ export function LatestSermon({ sermon }: { sermon: Sermon }) {
                     <div className="lg:w-1/2 w-full relative group animate-fade-in-up delay-200">
                         <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border-8 border-white/5 shadow-2xl">
                             <img 
-                                src="/pastor_preaching.png" // Using the generated pastor image
+                                src={displayBg} 
                                 alt={sermon.title}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             />

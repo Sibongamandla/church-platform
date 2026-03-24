@@ -13,7 +13,8 @@ interface Event {
     imageUrl?: string | null;
 }
 
-export function EventsPreview({ events }: { events: Event[] }) {
+export function EventsPreview({ events, bgImage }: { events: Event[], bgImage?: string }) {
+    const displayBg = bgImage || "/worship_congregation.png";
     return (
         <section className="py-32 bg-background overflow-hidden">
             <div className="container px-4 md:px-6">
@@ -40,11 +41,11 @@ export function EventsPreview({ events }: { events: Event[] }) {
                                 </Button>
                             </Link>
                         </div>
-
++
                         {/* Visual Decoration */}
                         <div className="relative h-64 w-full rounded-[2rem] overflow-hidden hidden lg:block group shadow-2xl">
                              <img 
-                                src="/worship_congregation.png" 
+                                src={displayBg} 
                                 alt="Worship" 
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />

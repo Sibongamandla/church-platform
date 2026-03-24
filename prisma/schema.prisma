@@ -177,6 +177,15 @@ model HomeSlide {
   updatedAt DateTime @updatedAt
 }
 
+model SiteMedia {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g., 'sermons_header_bg', 'events_header_bg'
+  label     String   // e.g., 'Sermons Page Header Background'
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ==========================================
 // MINISTRIES & SMALL GROUPS
 // ==========================================
