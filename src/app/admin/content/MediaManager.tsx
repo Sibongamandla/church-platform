@@ -28,6 +28,12 @@ const PLACEMENTS: MediaPlacement[] = [
         defaultUrl: "/church_venue_exterior.png"
     },
     {
+        key: "announcements_header_bg",
+        label: "Announcements Page Header",
+        description: "Background image for the news and updates listing page header section.",
+        defaultUrl: "/church_venue_exterior.png"
+    },
+    {
         key: "home_events_preview_bg",
         label: "Home: Events Preview Decoration",
         description: "The decorative image shown next to the upcoming events list on the home page.",
