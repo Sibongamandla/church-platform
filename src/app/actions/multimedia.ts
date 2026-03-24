@@ -30,7 +30,8 @@ export async function updateEventRecapAction(prevState: any, formData: FormData)
             },
         });
 
-        revalidatePath("/events");
+        revalidatePath("/", "layout");
+        revalidatePath("/events", "layout");
         return { success: true };
     } catch (error) {
         console.error("Failed to update recap:", error);
@@ -63,8 +64,8 @@ export async function updateSermonHighlightAction(prevState: any, formData: Form
             },
         });
 
-        revalidatePath("/sermons");
-        revalidatePath("/");
+        revalidatePath("/", "layout");
+        revalidatePath("/sermons", "layout");
         return { success: true };
     } catch (error) {
         console.error("Failed to update highlight:", error);
