@@ -37,26 +37,30 @@ model Session {
 }
 
 model Member {
-  id            String        @id @default(cuid())
-  firstName     String
-  lastName      String
-  email         String?
-  phone         String?
-  address       String?
-  birthday      DateTime?
-  gender        String?
-  status        String        @default("ACTIVE")
-  familyId      String?
-  userId        String?       @unique
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  recruitedById String?
-  attendance    Attendance[]
-  family        Family?       @relation(fields: [familyId], references: [id])
-  recruitedBy   Member?       @relation("Recruitment", fields: [recruitedById], references: [id])
-  recruits      Member[]      @relation("Recruitment")
-  user          User?         @relation(fields: [userId], references: [id])
-  smartProfile  SmartProfile?
+  id                String             @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String?
+  phone             String?
+  address           String?
+  birthday          DateTime?
+  gender            String?
+  status            String             @default("ACTIVE")
+  familyId          String?
+  userId            String?            @unique
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  recruitedById     String?
+  attendance        Attendance[]
+  family            Family?            @relation(fields: [familyId], references: [id])
+  recruitedBy       Member?            @relation("Recruitment", fields: [recruitedById], references: [id])
+  recruits          Member[]           @relation("Recruitment")
+  user              User?              @relation(fields: [userId], references: [id])
+  smartProfile      SmartProfile?
+  groupMemberships  GroupMember[]
+  groupAttendances  GroupAttendance[]
+  teamMemberships   TeamMember[]
+  rosterAssignments RosterAssignment[]
 }
 
 model SmartProfile {
@@ -145,17 +149,18 @@ model Sermon {
 }
 
 model ServiceSession {
-  id         String       @id @default(cuid())
+  id         String           @id @default(cuid())
   name       String
-  date       DateTime     @db.Date
+  date       DateTime         @db.Date
   startTime  DateTime
   endTime    DateTime
-  headcount  Int          @default(0)
-  isArchived Boolean      @default(false)
-  type       SessionType  @default(AUTOMATIC)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  headcount  Int              @default(0)
+  isArchived Boolean          @default(false)
+  type       SessionType      @default(AUTOMATIC)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
   attendance Attendance[]
+  schedule   ServiceSchedule?
 
   @@unique([name, date])
 }
@@ -170,4 +175,110 @@ model HomeSlide {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// MINISTRIES & SMALL GROUPS
+// ==========================================
+
+model MinistryGroup {
+  id          String         @id @default(cuid())
+  name        String
+  type        String // e.g., "CELL", "MINISTRY"
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  members     GroupMember[]
+  sessions    GroupSession[]
+}
+
+model GroupMember {
+  id       String        @id @default(cuid())
+  groupId  String
+  memberId String
+  role     String        @default("MEMBER") // "LEADER" or "MEMBER"
+  joinedAt DateTime      @default(now())
+  group    MinistryGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  member   Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, memberId])
+}
+
+model GroupSession {
+  id          String            @id @default(cuid())
+  groupId     String
+  date        DateTime          @db.Date
+  topic       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  group       MinistryGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  attendances GroupAttendance[]
+
+  @@unique([groupId, date])
+}
+
+model GroupAttendance {
+  id        String       @id @default(cuid())
+  sessionId String
+  memberId  String
+  createdAt DateTime     @default(now())
+  session   GroupSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  member    Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, memberId])
+}
+
+// ==========================================
+// VOLUNTEER ROSTERING & SCHEDULING
+// ==========================================
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  roles       TeamRole[]
+  members     TeamMember[]
+}
+
+model TeamRole {
+  id          String             @id @default(cuid())
+  teamId      String
+  name        String
+  team        Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignments RosterAssignment[]
+  members     TeamMember[]
+}
+
+model TeamMember {
+  id       String    @id @default(cuid())
+  teamId   String
+  memberId String
+  roleId   String? // Default assigned role
+  team     Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  member   Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  role     TeamRole? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  @@unique([teamId, memberId])
+}
+
+model ServiceSchedule {
+  id               String             @id @default(cuid())
+  serviceSessionId String             @unique
+  session          ServiceSession     @relation(fields: [serviceSessionId], references: [id], onDelete: Cascade)
+  assignments      RosterAssignment[]
+}
+
+model RosterAssignment {
+  id         String          @id @default(cuid())
+  scheduleId String
+  memberId   String
+  teamRoleId String
+  status     String          @default("PENDING") // PENDING, CONFIRMED, DECLINED
+  schedule   ServiceSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  member     Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  role       TeamRole        @relation(fields: [teamRoleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, memberId, teamRoleId])
 }
