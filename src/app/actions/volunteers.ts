@@ -75,21 +75,48 @@ export async function removeTeamMemberAction(teamId: string, memberId: string) {
     }
 }
 
-export async function scheduleVolunteerAction(scheduleId: string, memberId: string, teamRoleId: string, callTime?: string) {
+export async function scheduleVolunteerAction({ 
+    sessionId, 
+    scheduleId: providedScheduleId, 
+    memberId, 
+    roleId, 
+    callTime 
+}: { 
+    sessionId: string; 
+    scheduleId?: string; 
+    memberId: string; 
+    roleId: string; 
+    callTime?: string; 
+}) {
     await requireRole("SUPER_ADMIN");
     try {
+        let scheduleId = providedScheduleId;
+
+        // If no schedule exists yet for this session, create one
+        if (!scheduleId) {
+            const schedule = await prisma.serviceSchedule.upsert({
+                where: { serviceSessionId: sessionId },
+                update: {},
+                create: { serviceSessionId: sessionId }
+            });
+            scheduleId = schedule.id;
+        }
+
         await prisma.rosterAssignment.create({
             data: {
                 scheduleId,
                 memberId,
-                teamRoleId,
+                teamRoleId: roleId,
                 callTime: callTime || null,
                 status: "PENDING"
             }
         });
+
+        revalidatePath(`/admin/volunteers/roster/${sessionId}`);
         revalidatePath("/admin/volunteers/roster");
         return { success: true };
     } catch (error) {
+        console.error("Schedule error:", error);
         return { error: "Failed to create roster assignment" };
     }
 }

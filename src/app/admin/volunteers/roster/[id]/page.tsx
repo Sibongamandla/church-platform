@@ -31,7 +31,9 @@ export default async function ServiceRosterEditorPage({ params }: { params: Prom
     // Fetch all active team members grouped by their teams, to select from
     const teams = await prisma.team.findMany({
         include: {
-            roles: true,
+            roles: {
+                include: { team: true }
+            },
             members: {
                 include: { member: true }
             }
