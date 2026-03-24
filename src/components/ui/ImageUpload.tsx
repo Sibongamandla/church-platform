@@ -11,31 +11,94 @@ interface ImageUploadProps {
     className?: string;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+async function compressImage(file: File): Promise<File | Blob> {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const MAX_WIDTH = 1920; // Reasonable HD width
+                const MAX_HEIGHT = 1080;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx?.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            resolve(file);
+                        }
+                    },
+                    "image/jpeg",
+                    0.8 // 80% quality
+                );
+            };
+        };
+    });
+}
+
 export function ImageUpload({ value, onChange, placeholder = "Upload image", className }: ImageUploadProps) {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+        let file = e.target.files?.[0];
         if (!file) return;
 
+        if (file.size > MAX_FILE_SIZE) {
+            alert("File is too large. Please select an image smaller than 10MB.");
+            return;
+        }
+
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append("file", file);
 
         try {
+            // Compress if it's a large image
+            if (file.size > 1 * 1024 * 1024) { // > 1MB
+                const compressedBlob = await compressImage(file);
+                file = new File([compressedBlob], file.name, { type: "image/jpeg" });
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
             const response = await fetch("/api/upload", {
                 method: "POST",
                 body: formData,
             });
 
-            if (!response.ok) throw new Error("Upload failed");
+            if (!response.ok) {
+                if (response.status === 413) {
+                    throw new Error("File is too large for the server. Please try a smaller image.");
+                }
+                throw new Error("Upload failed");
+            }
 
             const data = await response.json();
             onChange(data.url);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Upload error:", error);
-            alert("Failed to upload image. Please try again.");
+            alert(error.message || "Failed to upload image. Please try again.");
         } finally {
             setIsUploading(false);
         }
