@@ -17,25 +17,27 @@ export function RosterEditor({
     sessionId,
     scheduleId,
     assignments,
-    teams 
+    teams,
+    linkedTeamIds = []
 }: { 
     sessionId: string;
     scheduleId?: string;
     assignments: Assignment[];
     teams: Team[];
+    linkedTeamIds?: string[];
 }) {
     const [loading, setLoading] = useState(false);
     
-    // For MVP, we need a scheduleId to assign.
-    // If it doesn't exist, we'd theoretically create it first, but for simplicity here we assume it's handled or we'd add an action.
-    // In a real app we'd trigger a schedule creation if not present.
-    // For this boilerplate, let's assume scheduleId is required.
+    // Filter teams to show only linked ones
+    const displayTeams = linkedTeamIds.length > 0
+        ? teams.filter(t => linkedTeamIds.includes(t.id))
+        : teams;
 
     const [selectedTeam, setSelectedTeam] = useState("");
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedMember, setSelectedMember] = useState("");
 
-    const activeTeam = teams.find(t => t.id === selectedTeam);
+    const activeTeam = displayTeams.find(t => t.id === selectedTeam);
     const activeMembers = activeTeam?.members || [];
     const activeRoles = activeTeam?.roles || [];
 
@@ -77,7 +79,7 @@ export function RosterEditor({
                                 disabled={loading}
                             >
                                 <option value="">Select Team...</option>
-                                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                {displayTeams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
                         </div>
                         
