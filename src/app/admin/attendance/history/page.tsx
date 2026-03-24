@@ -4,6 +4,9 @@ import { ArrowLeft, Clock, TrendingUp, Users } from "lucide-react";
 
 export default async function AttendanceHistoryPage() {
     const sessions = await prisma.serviceSession.findMany({
+        where: {
+            startTime: { lte: new Date() }
+        },
         orderBy: { date: "desc" },
         take: 50
     });
