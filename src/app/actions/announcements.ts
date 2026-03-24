@@ -37,7 +37,8 @@ export async function createAnnouncementAction(prevState: any, formData: FormDat
                 category,
             },
         });
-        // revalidateTag(CACHE_TAGS.announcements);
+        revalidateTag(CACHE_TAGS.announcements);
+        revalidatePath("/", "layout");
     } catch (error) {
         return { error: "Failed to create announcement" };
     }
@@ -56,6 +57,8 @@ export async function deleteAnnouncementAction(formData: FormData) {
         where: { id },
     });
 
+    revalidateTag(CACHE_TAGS.announcements);
+    revalidatePath("/", "layout");
     revalidatePath("/admin/announcements");
 }
 
@@ -87,6 +90,8 @@ export async function updateAnnouncementAction(prevState: any, formData: FormDat
         return { error: "Failed to update announcement" };
     }
 
+    revalidateTag(CACHE_TAGS.announcements);
+    revalidatePath("/", "layout");
     revalidatePath("/admin/announcements");
     redirect("/admin/announcements");
 }
