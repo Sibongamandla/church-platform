@@ -151,6 +151,14 @@ export async function publicJoinTeamAction(teamId: string, memberId?: string, da
     try {
         let finalMemberId = memberId;
 
+        // If memberId is provided, and we have data (phone), update the member's record
+        if (finalMemberId && data?.phone) {
+            await prisma.member.update({
+                where: { id: finalMemberId },
+                data: { phone: data.phone }
+            });
+        }
+
         // If no memberId, we create/find by phone (Quick Form)
         if (!finalMemberId && data) {
             const existing = await prisma.member.findFirst({

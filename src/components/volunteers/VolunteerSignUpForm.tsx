@@ -21,6 +21,7 @@ export function VolunteerSignUpForm({ teams }: { teams: Team[] }) {
     
     // Form State
     const [formData, setFormData] = useState({ firstName: "", lastName: "", phone: "", email: "" });
+    const [memberIdToLink, setMemberIdToLink] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
     async function handleTeamSelect(team: Team) {
@@ -44,6 +45,20 @@ export function VolunteerSignUpForm({ teams }: { teams: Team[] }) {
 
     async function handleJoinWithMemberId(memberId: string) {
         if (!selectedTeam) return;
+        
+        const member = searchResults?.find(m => m.id === memberId);
+        if (member && !member.phone) {
+            setFormData({ 
+                firstName: member.firstName, 
+                lastName: member.lastName, 
+                phone: "", 
+                email: member.email || "" 
+            });
+            setMemberIdToLink(memberId);
+            setStep("FORM");
+            return;
+        }
+
         setSubmitting(true);
         const res = await publicJoinTeamAction(selectedTeam.id, memberId);
         if (res.success) setStep("SUCCESS");
@@ -55,7 +70,7 @@ export function VolunteerSignUpForm({ teams }: { teams: Team[] }) {
         e.preventDefault();
         if (!selectedTeam) return;
         setSubmitting(true);
-        const res = await publicJoinTeamAction(selectedTeam.id, undefined, formData);
+        const res = await publicJoinTeamAction(selectedTeam.id, memberIdToLink || undefined, formData);
         if (res.success) setStep("SUCCESS");
         else alert(res.error || "Failed to join");
         setSubmitting(false);
@@ -190,8 +205,15 @@ export function VolunteerSignUpForm({ teams }: { teams: Team[] }) {
             {step === "FORM" && (
                 <div className="max-w-md mx-auto space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center">
-                        <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Quick Sign-up</h2>
-                        <p className="text-sm text-muted-foreground">Just the basics so we can get in touch</p>
+                        <h2 className="text-2xl font-black uppercase tracking-tight mb-2">
+                            {memberIdToLink ? "Complete Your Profile" : "Quick Sign-up"}
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            {memberIdToLink 
+                                ? "We found your record, but we need your phone number to coordinate scheduling."
+                                : "Just the basics so we can get in touch"
+                            }
+                        </p>
                     </div>
 
                     <form onSubmit={handleJoinWithForm} className="space-y-5">
