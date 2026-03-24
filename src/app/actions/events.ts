@@ -45,8 +45,8 @@ export async function createEventAction(prevState: any, formData: FormData) {
                 isFeatured,
             },
         });
-        revalidateTag(CACHE_TAGS.events);
         revalidatePath("/", "layout");
+        revalidatePath("/events", "layout");
     } catch (error) {
         return { error: "Failed to create event" };
     }
@@ -65,9 +65,9 @@ export async function deleteEventAction(formData: FormData) {
         where: { id },
     });
 
-    revalidateTag(CACHE_TAGS.events);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/events");
+    revalidatePath("/events", "layout");
+    revalidatePath("/admin/events", "layout");
 }
 
 export async function updateEventAction(prevState: any, formData: FormData) {
@@ -103,9 +103,9 @@ export async function updateEventAction(prevState: any, formData: FormData) {
         return { error: "Failed to update event" };
     }
 
-    revalidateTag(CACHE_TAGS.events);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/events");
+    revalidatePath("/events", "layout");
+    revalidatePath("/admin/events", "layout");
     redirect("/admin/events");
 }
 
