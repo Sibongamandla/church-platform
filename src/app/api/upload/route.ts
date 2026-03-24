@@ -38,8 +38,19 @@ export async function POST(request: NextRequest) {
             url: `/uploads/${filename}`,
             filename: file.name
         });
-    } catch (error) {
-        console.error("Upload error:", error);
-        return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    } catch (error: any) {
+        // Handle Next.js redirect errors (e.g., from requireRole)
+        if (error.digest?.startsWith("NEXT_REDIRECT")) {
+            throw error;
+        }
+
+        console.error("FULL UPLOAD ERROR:", error);
+        
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        return NextResponse.json({ 
+            error: "Upload failed", 
+            details: errorMessage,
+            stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+        }, { status: 500 });
     }
 }

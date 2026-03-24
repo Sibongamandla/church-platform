@@ -194,3 +194,33 @@ export async function publicJoinTeamAction(teamId: string, memberId?: string, da
         return { error: "Something went wrong while signing you up." };
     }
 }
+
+export async function linkTeamToSessionAction(teamId: string, sessionId: string) {
+    await requireRole("SUPER_ADMIN");
+    try {
+        await prisma.serviceTeam.create({
+            data: { teamId, sessionId }
+        });
+        revalidatePath(`/admin/volunteers/${teamId}`);
+        revalidatePath(`/admin/volunteers/roster/${sessionId}`);
+        return { success: true };
+    } catch (error) {
+        return { error: "Failed to link team to session" };
+    }
+}
+
+export async function unlinkTeamFromSessionAction(teamId: string, sessionId: string) {
+    await requireRole("SUPER_ADMIN");
+    try {
+        await prisma.serviceTeam.delete({
+            where: {
+                teamId_sessionId: { teamId, sessionId }
+            }
+        });
+        revalidatePath(`/admin/volunteers/${teamId}`);
+        revalidatePath(`/admin/volunteers/roster/${sessionId}`);
+        return { success: true };
+    } catch (error) {
+        return { error: "Failed to unlink team from session" };
+    }
+}

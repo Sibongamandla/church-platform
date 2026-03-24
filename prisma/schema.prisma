@@ -161,6 +161,7 @@ model ServiceSession {
   updatedAt  DateTime         @updatedAt
   attendance Attendance[]
   schedule   ServiceSchedule?
+  serviceTeams ServiceTeam[]
 
   @@unique([name, date])
 }
@@ -249,6 +250,7 @@ model Team {
   updatedAt   DateTime     @updatedAt
   roles       TeamRole[]
   members     TeamMember[]
+  serviceTeams ServiceTeam[]
 }
 
 model TeamRole {
@@ -290,4 +292,14 @@ model RosterAssignment {
   role       TeamRole        @relation(fields: [teamRoleId], references: [id], onDelete: Cascade)
 
   @@unique([scheduleId, memberId, teamRoleId])
+}
+
+model ServiceTeam {
+  id        String         @id @default(cuid())
+  teamId    String
+  sessionId String
+  team      Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  session   ServiceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, sessionId])
 }

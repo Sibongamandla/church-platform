@@ -46,6 +46,9 @@ export async function createManualSessionAction(prevState: ManualSessionState, f
                 endTime: end,
                 type: "MANUAL",
                 headcount: 0,
+                schedule: {
+                    create: {}
+                }
             }
         });
 

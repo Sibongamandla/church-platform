@@ -91,14 +91,15 @@ export function ImageUpload({ value, onChange, placeholder = "Upload image", cla
                 if (response.status === 413) {
                     throw new Error("File is too large for the server. Please try a smaller image.");
                 }
-                throw new Error("Upload failed");
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.details || errorData.error || "Upload failed");
             }
 
             const data = await response.json();
             onChange(data.url);
         } catch (error: any) {
             console.error("Upload error:", error);
-            alert(error.message || "Failed to upload image. Please try again.");
+            alert(`Upload failed: ${error.message}`);
         } finally {
             setIsUploading(false);
         }
