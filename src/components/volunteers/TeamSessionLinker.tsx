@@ -92,11 +92,19 @@ export function TeamSessionLinker({
                                     <p className="font-bold">{s.name}</p>
                                     <p className="text-xs text-muted-foreground">{new Date(s.date).toLocaleDateString()}</p>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="h-8 transition-all hover:bg-primary/5 hover:text-primary hover:border-primary/30"
+                                        onClick={() => router.push(`/admin/volunteers/roster/${s.id}?teamId=${teamId}`)}
+                                    >
+                                        Schedule Roster
+                                    </Button>
                                     <Button 
                                         variant="ghost" 
                                         size="sm" 
-                                        className="text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="text-destructive h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                                         onClick={() => handleUnlink(s.id)}
                                         disabled={loading}
                                     >

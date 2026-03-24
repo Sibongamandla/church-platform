@@ -286,6 +286,7 @@ model RosterAssignment {
   scheduleId String
   memberId   String
   teamRoleId String
+  callTime   String?
   status     String          @default("PENDING") // PENDING, CONFIRMED, DECLINED
   schedule   ServiceSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   member     Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)

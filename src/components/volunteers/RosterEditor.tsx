@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { scheduleVolunteerAction, updateAssignmentStatusAction } from "@/app/actions/volunteers";
-import { Loader2, UserPlus, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Loader2, UserPlus, CheckCircle, Clock, XCircle, Timer } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 type Member = { id: string; firstName: string; lastName: string };
 type TeamRole = { id: string; name: string; team: { name: string } };
-type Assignment = { id: string; status: string; member: Member; role: TeamRole };
+type Assignment = { id: string; status: string; member: Member; role: TeamRole; callTime?: string | null };
 
 // We use simplified types for the editor props
 type TeamMember = { id: string; member: Member; roleId: string | null };
@@ -27,6 +28,7 @@ export function RosterEditor({
     linkedTeamIds?: string[];
 }) {
     const [loading, setLoading] = useState(false);
+    const searchParams = useSearchParams();
     
     // Filter teams to show only linked ones
     const displayTeams = linkedTeamIds.length > 0
@@ -36,6 +38,15 @@ export function RosterEditor({
     const [selectedTeam, setSelectedTeam] = useState("");
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedMember, setSelectedMember] = useState("");
+    const [callTime, setCallTime] = useState("");
+
+    // Pre-selection logic
+    useEffect(() => {
+        const teamIdParam = searchParams.get("teamId");
+        if (teamIdParam && teams.some(t => t.id === teamIdParam)) {
+            setSelectedTeam(teamIdParam);
+        }
+    }, [searchParams, teams]);
 
     const activeTeam = displayTeams.find(t => t.id === selectedTeam);
     const activeMembers = activeTeam?.members || [];
@@ -48,8 +59,13 @@ export function RosterEditor({
         }
 
         setLoading(true);
-        await scheduleVolunteerAction(scheduleId, selectedMember, selectedRole);
-        setSelectedMember("");
+        const res = await scheduleVolunteerAction(scheduleId, selectedMember, selectedRole, callTime);
+        if (res.success) {
+            setSelectedMember("");
+            setCallTime("");
+        } else {
+            alert(res.error || "Failed to schedule volunteer");
+        }
         setLoading(false);
     }
 
@@ -61,11 +77,27 @@ export function RosterEditor({
 
     return (
         <div className="space-y-8">
-            <div className="rounded-xl border bg-card p-6">
-                <h3 className="text-lg font-semibold mb-4">Assign Volunteer</h3>
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Assign Volunteer</h3>
+                    {selectedTeam && (
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
+                            onClick={() => {
+                                setSelectedTeam("");
+                                setSelectedRole("");
+                                setSelectedMember("");
+                            }}
+                        >
+                            Clear Selection
+                        </Button>
+                    )}
+                </div>
                 
                 {scheduleId ? (
-                    <div className="grid md:grid-cols-4 gap-4 items-end">
+                    <div className="grid md:grid-cols-5 gap-4 items-end">
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Team</label>
                             <select 
@@ -113,6 +145,17 @@ export function RosterEditor({
                             </select>
                         </div>
 
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Call Time (Arrival)</label>
+                            <input 
+                                type="time"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                value={callTime}
+                                onChange={(e) => setCallTime(e.target.value)}
+                                disabled={loading}
+                            />
+                        </div>
+
                         <Button onClick={handleAssign} disabled={!selectedMember || !selectedRole || loading} className="w-full">
                             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}
                             Schedule
@@ -120,13 +163,12 @@ export function RosterEditor({
                     </div>
                 ) : (
                     <div className="text-sm text-yellow-600 bg-yellow-500/10 p-4 rounded-lg">
-                        Cannot assign volunteers: No Schedule Record exists for this session yet. 
-                        (In a full implementation, this would auto-create).
+                        Cannot assign volunteers: No Schedule Record exists for this session yet.
                     </div>
                 )}
             </div>
 
-            <div className="rounded-xl border bg-card p-6">
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Current Roster</h3>
                 {assignments.length === 0 ? (
                     <p className="text-sm text-muted-foreground italic text-center py-6">No volunteers assigned.</p>
@@ -137,6 +179,7 @@ export function RosterEditor({
                                 <tr>
                                     <th className="px-4 py-3 font-medium">Volunteer</th>
                                     <th className="px-4 py-3 font-medium">Role</th>
+                                    <th className="px-4 py-3 font-medium">Call Time</th>
                                     <th className="px-4 py-3 font-medium">Status</th>
                                     <th className="px-4 py-3 font-medium text-right">Update Status</th>
                                 </tr>
@@ -149,6 +192,16 @@ export function RosterEditor({
                                         </td>
                                         <td className="px-4 py-3">
                                             {a.role.team.name} • {a.role.name}
+                                        </td>
+                                        <td className="px-4 py-3 font-medium text-primary">
+                                            {a.callTime ? (
+                                                <div className="flex items-center gap-1.5">
+                                                    <Timer className="h-3.5 w-3.5" />
+                                                    {a.callTime}
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground font-normal italic">Not set</span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-1">

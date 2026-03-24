@@ -75,7 +75,7 @@ export async function removeTeamMemberAction(teamId: string, memberId: string) {
     }
 }
 
-export async function scheduleVolunteerAction(scheduleId: string, memberId: string, teamRoleId: string) {
+export async function scheduleVolunteerAction(scheduleId: string, memberId: string, teamRoleId: string, callTime?: string) {
     await requireRole("SUPER_ADMIN");
     try {
         await prisma.rosterAssignment.create({
@@ -83,6 +83,7 @@ export async function scheduleVolunteerAction(scheduleId: string, memberId: stri
                 scheduleId,
                 memberId,
                 teamRoleId,
+                callTime: callTime || null,
                 status: "PENDING"
             }
         });
