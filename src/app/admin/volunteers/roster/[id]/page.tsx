@@ -17,11 +17,16 @@ export default async function ServiceRosterEditorPage({ params }: { params: Prom
                         }
                     }
                 }
+            },
+            serviceTeams: {
+                select: { teamId: true }
             }
         }
     });
 
     if (!session) return <div>Session not found</div>;
+
+    const linkedTeamIds = session.serviceTeams.map(st => st.teamId);
 
     // Fetch all active team members grouped by their teams, to select from
     const teams = await prisma.team.findMany({
@@ -55,6 +60,7 @@ export default async function ServiceRosterEditorPage({ params }: { params: Prom
                 scheduleId={session.schedule?.id}
                 assignments={session.schedule?.assignments || []}
                 teams={teams}
+                linkedTeamIds={linkedTeamIds}
             />
         </div>
     );
