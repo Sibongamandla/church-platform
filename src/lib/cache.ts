@@ -10,9 +10,9 @@ export const CACHE_TAGS = {
 
 // Revalidation times (in seconds)
 export const REVALIDATE = {
-    SHORT: 0,        // Immediate
-    MEDIUM: 0,       // Immediate
-    LONG: 86400,     // 24 hours
+    SHORT: false as const,  // Immediate / No background refresh
+    MEDIUM: false as const, // Immediate / No background refresh
+    LONG: 86400,            // 24 hours
 };
 
 export const getCachedEvents = unstable_cache(
