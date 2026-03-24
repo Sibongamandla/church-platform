@@ -14,7 +14,9 @@ import {
     Video,
     UserCheck,
     Menu,
-    X
+    X,
+    HeartHandshake,
+    Layers
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -25,6 +27,8 @@ const navLinks = [
     { href: "/admin/sermons", label: "Sermons", icon: Video },
     { href: "/admin/members", label: "Members", icon: Users },
     { href: "/admin/visitors", label: "Visitors", icon: UserCheck },
+    { href: "/admin/ministries", label: "Ministries", icon: Layers },
+    { href: "/admin/volunteers", label: "Volunteers", icon: HeartHandshake },
     { href: "/admin/attendance", label: "Attendance", icon: ClipboardCheck },
     { href: "/admin/qrcodes", label: "QR Codes", icon: QrCode },
     { href: "/admin/settings", label: "Settings", icon: Settings },
