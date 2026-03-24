@@ -3,9 +3,10 @@ import Link from "next/link";
 import { ArrowLeft, Edit } from "lucide-react";
 import { TeamManager } from "@/components/volunteers/TeamManager";
 
-export default async function TeamDetailsPage({ params }: { params: { id: string } }) {
+export default async function TeamDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const team = await prisma.team.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             roles: {
                 orderBy: { name: "asc" }

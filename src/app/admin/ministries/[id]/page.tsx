@@ -3,9 +3,10 @@ import Link from "next/link";
 import { ArrowLeft, Users, Calendar } from "lucide-react";
 import { RosterManager } from "@/components/ministries/RosterManager";
 
-export default async function MinistryDetailsPage({ params }: { params: { id: string } }) {
+export default async function MinistryDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const group = await prisma.ministryGroup.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             members: {
                 include: { member: true },

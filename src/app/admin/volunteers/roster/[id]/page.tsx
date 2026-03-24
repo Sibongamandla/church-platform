@@ -3,9 +3,10 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { RosterEditor } from "@/components/volunteers/RosterEditor";
 
-export default async function ServiceRosterEditorPage({ params }: { params: { id: string } }) {
+export default async function ServiceRosterEditorPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await prisma.serviceSession.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             schedule: {
                 include: {

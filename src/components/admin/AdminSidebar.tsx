@@ -16,7 +16,8 @@ import {
     Menu,
     X,
     HeartHandshake,
-    Layers
+    Layers,
+    Image as ImageIcon
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -25,6 +26,7 @@ const navLinks = [
     { href: "/admin/events", label: "Events", icon: Calendar },
     { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
     { href: "/admin/sermons", label: "Sermons", icon: Video },
+    { href: "/admin/content", label: "Content", icon: ImageIcon },
     { href: "/admin/members", label: "Members", icon: Users },
     { href: "/admin/visitors", label: "Visitors", icon: UserCheck },
     { href: "/admin/ministries", label: "Ministries", icon: Layers },
