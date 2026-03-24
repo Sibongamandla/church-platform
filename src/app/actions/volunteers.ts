@@ -225,3 +225,17 @@ export async function unlinkTeamFromSessionAction(teamId: string, sessionId: str
         return { error: "Failed to unlink team from session" };
     }
 }
+
+export async function updateAssignmentStatusPublicAction(assignmentId: string, status: "CONFIRMED" | "DECLINED") {
+    // This is public, no auth required, just a valid ID
+    try {
+        await prisma.rosterAssignment.update({
+            where: { id: assignmentId },
+            data: { status }
+        });
+        revalidatePath("/admin/volunteers/roster");
+        return { success: true };
+    } catch (error) {
+        return { error: "Failed to update status" };
+    }
+}

@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { scheduleVolunteerAction, updateAssignmentStatusAction } from "@/app/actions/volunteers";
-import { Loader2, UserPlus, CheckCircle, Clock, XCircle, Timer } from "lucide-react";
+import { Loader2, UserPlus, CheckCircle, Clock, XCircle, Timer, MessageSquare, Mail } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
-type Member = { id: string; firstName: string; lastName: string };
+type Member = { id: string; firstName: string; lastName: string; phone?: string | null; email?: string | null };
 type TeamRole = { id: string; name: string; team: { name: string } };
 type Assignment = { id: string; status: string; member: Member; role: TeamRole; callTime?: string | null };
 
@@ -73,6 +73,21 @@ export function RosterEditor({
         setLoading(true);
         await updateAssignmentStatusAction(assignmentId, status);
         setLoading(false);
+    }
+
+    const generateWhatsAppLink = (a: Assignment) => {
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+        const confirmUrl = `${baseUrl}/volunteer/confirm/${a.id}`;
+        const message = `Hi ${a.member.firstName}, you've been scheduled for service on our roster as ${a.role.name}. Your call time is ${a.callTime || 'the start of service'}. Please confirm here: ${confirmUrl}`;
+        return `https://wa.me/${a.member.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    }
+
+    const generateEmailLink = (a: Assignment) => {
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+        const confirmUrl = `${baseUrl}/volunteer/confirm/${a.id}`;
+        const subject = `Service Roster Assignment`;
+        const body = `Hi ${a.member.firstName},\n\nYou've been scheduled to serve as ${a.role.name} on our roster.\n\nYour call time is ${a.callTime || 'the start of service'}.\n\nPlease confirm your availability here: ${confirmUrl}\n\nThank you!`;
+        return `mailto:${a.member.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
 
     return (
@@ -181,6 +196,7 @@ export function RosterEditor({
                                     <th className="px-4 py-3 font-medium">Role</th>
                                     <th className="px-4 py-3 font-medium">Call Time</th>
                                     <th className="px-4 py-3 font-medium">Status</th>
+                                    <th className="px-4 py-3 font-medium">Notify</th>
                                     <th className="px-4 py-3 font-medium text-right">Update Status</th>
                                 </tr>
                             </thead>
@@ -208,6 +224,30 @@ export function RosterEditor({
                                                 {a.status === "CONFIRMED" && <><CheckCircle className="h-4 w-4 text-green-500" /> Confirmed</>}
                                                 {a.status === "PENDING" && <><Clock className="h-4 w-4 text-yellow-500" /> Pending</>}
                                                 {a.status === "DECLINED" && <><XCircle className="h-4 w-4 text-red-500" /> Declined</>}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                {a.member.phone && (
+                                                    <a 
+                                                        href={generateWhatsAppLink(a)} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 rounded-full hover:bg-green-50 text-green-600 transition-colors"
+                                                        title="Notify via WhatsApp"
+                                                    >
+                                                        <MessageSquare className="h-4 w-4" />
+                                                    </a>
+                                                )}
+                                                {a.member.email && (
+                                                    <a 
+                                                        href={generateEmailLink(a)} 
+                                                        className="p-2 rounded-full hover:bg-blue-50 text-blue-600 transition-colors"
+                                                        title="Notify via Email"
+                                                    >
+                                                        <Mail className="h-4 w-4" />
+                                                    </a>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-right">
