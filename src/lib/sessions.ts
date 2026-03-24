@@ -1,4 +1,4 @@
-import { startOfDay, endOfDay, isSunday, isWednesday, isFriday, addMinutes, subMinutes, isAfter, isBefore } from "date-fns";
+import { startOfDay, endOfDay, isSunday, isWednesday, isFriday, addMinutes, subMinutes, isAfter, isBefore, addDays } from "date-fns";
 import { prisma } from "./prisma";
 
 export type SessionConfig = {
@@ -77,4 +77,46 @@ export function getSessionDateRange(date: Date = new Date()) {
         start: startOfDay(date),
         end: endOfDay(date),
     };
+}
+
+export async function syncUpcomingSessions(days: number = 14) {
+    const today = startOfDay(new Date());
+    const sessionsSynced = [];
+
+    for (let i = 0; i < days; i++) {
+        const currentDate = addDays(today, i);
+        const dayOfWeek = currentDate.getDay();
+
+        const config = AUTOMATIC_SESSIONS.find(s => s.day === dayOfWeek);
+        if (config) {
+            const [hours, minutes] = config.startTime.split(':').map(Number);
+            const startTime = new Date(currentDate);
+            startTime.setHours(hours, minutes, 0, 0);
+            
+            const endTime = new Date(startTime);
+            endTime.setHours(startTime.getHours() + 4);
+
+            await prisma.serviceSession.upsert({
+                where: {
+                    name_date: {
+                        name: config.name,
+                        date: currentDate,
+                    }
+                },
+                update: {},
+                create: {
+                    name: config.name,
+                    date: currentDate,
+                    startTime,
+                    endTime,
+                    type: "AUTOMATIC",
+                    schedule: {
+                        create: {}
+                    }
+                }
+            });
+            sessionsSynced.push(`${config.name} on ${currentDate.toLocaleDateString()}`);
+        }
+    }
+    return sessionsSynced;
 }

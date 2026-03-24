@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Calendar, CheckCircle, Clock, XCircle, Plus, RefreshCw } from "lucide-react";
+import { SyncSessionsButton } from "@/components/volunteers/SyncSessionsButton";
+import { syncUpcomingSessions } from "@/lib/sessions";
 
 export default async function RostersPage() {
+    // Proactively sync upcoming sessions for the next 2 weeks
+    await syncUpcomingSessions(14);
+
     // Fetch upcoming services
     const upcomingSessions = await prisma.serviceSession.findMany({
         where: {
@@ -26,9 +31,21 @@ export default async function RostersPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Service Rosters</h1>
-                <p className="text-muted-foreground mt-2">Manage upcoming volunteer assignments.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Service Rosters</h1>
+                    <p className="text-muted-foreground mt-1">Manage upcoming volunteer assignments.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <SyncSessionsButton />
+                    <Link
+                        href="/admin/attendance/manual"
+                        className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Special Session
+                    </Link>
+                </div>
             </div>
 
             <div className="flex border-b border-border/40 gap-6">

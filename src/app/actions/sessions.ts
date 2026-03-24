@@ -1,6 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { AUTOMATIC_SESSIONS, syncUpcomingSessions } from "@/lib/sessions";
+import { startOfDay, addDays } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -59,4 +61,16 @@ export async function createManualSessionAction(prevState: ManualSessionState, f
     }
 
     redirect("/admin/attendance");
+}
+
+export async function syncAutomaticSessionsAction() {
+    try {
+        const sessionsSynced = await syncUpcomingSessions(14);
+        revalidatePath("/admin/volunteers/roster");
+        revalidatePath("/admin/attendance");
+        return { success: true, count: sessionsSynced.length };
+    } catch (error) {
+        console.error("Failed to sync sessions:", error);
+        return { success: false, error: "Failed to sync sessions" };
+    }
 }
