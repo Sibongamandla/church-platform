@@ -19,6 +19,22 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
     const session = assignment.schedule.session;
     const isPast = new Date(session.date) < new Date(new Date().setHours(0,0,0,0));
 
+    // Construct times
+    const [hours, minutes] = (assignment.callTime || "08:00").split(':').map(Number);
+    const eventStartTime = new Date(session.date);
+    eventStartTime.setHours(hours || 8, minutes || 0, 0, 0);
+
+    const eventEndTime = new Date(eventStartTime);
+    eventEndTime.setHours(eventStartTime.getHours() + 2);
+
+    const eventDetails = {
+        title: `Service Roster: ${assignment.role.name} @ ${session.name}`,
+        description: `Team: ${assignment.role.team.name}\nRole: ${assignment.role.name}\nPlease arrive by ${assignment.callTime || 'service start'}.\n\nConfirmed via Church Volunteer Platform.`,
+        startTime: eventStartTime,
+        endTime: eventEndTime,
+        location: "Great Nation Ministries"
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
@@ -50,8 +66,8 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
                         <div className="flex items-start gap-3">
                             <Clock className="w-5 h-5 text-primary mt-0.5" />
                             <div>
-                                <p className="font-semibold text-slate-900">Call Time: {assignment.callTime || session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                <p className="text-sm text-slate-500">Service starts at {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p className="font-semibold text-slate-900">Call Time: {assignment.callTime || "TBD"}</p>
+                                <p className="text-sm text-slate-500">Service Date: {new Date(session.date).toLocaleDateString()}</p>
                             </div>
                         </div>
 
@@ -69,7 +85,11 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
                             This service has already passed.
                         </div>
                     ) : (
-                        <ConfirmationButtons assignmentId={assignment.id} initialStatus={assignment.status} />
+                        <ConfirmationButtons 
+                            assignmentId={assignment.id} 
+                            initialStatus={assignment.status} 
+                            eventDetails={eventDetails}
+                        />
                     )}
                 </div>
 
