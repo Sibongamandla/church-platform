@@ -128,3 +128,31 @@ export const getFeaturedRecaps = unstable_cache(
         tags: [CACHE_TAGS.events],
     }
 );
+
+export const getAllAnnouncements = unstable_cache(
+    async () => {
+        return await prisma.announcement.findMany({
+            orderBy: {
+                date: "desc",
+            },
+        });
+    },
+    ["all-announcements"],
+    {
+        revalidate: REVALIDATE.SHORT,
+        tags: [CACHE_TAGS.announcements],
+    }
+);
+
+export const getAnnouncementById = unstable_cache(
+    async (id: string) => {
+        return await prisma.announcement.findUnique({
+            where: { id },
+        });
+    },
+    ["announcement-detail"],
+    {
+        revalidate: REVALIDATE.SHORT,
+        tags: [CACHE_TAGS.announcements],
+    }
+);

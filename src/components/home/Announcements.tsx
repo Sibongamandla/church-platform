@@ -20,7 +20,7 @@ export async function Announcements() {
                         </p>
                     </div>
                     <Link
-                        href="/admin/announcements" // Ideally public /announcements if it existed
+                        href="/announcements"
                         className="text-primary font-medium hover:underline flex items-center gap-2"
                     >
                         View all updates <Info className="h-4 w-4" />
@@ -34,8 +34,9 @@ export async function Announcements() {
                         </div>
                     ) : (
                         announcements.map((item) => (
-                            <div
+                            <Link
                                 key={item.id}
+                                href={`/announcements/${item.id}`}
                                 className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-border/50 bg-card p-8 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
                             >
                                 <div className="space-y-6">
@@ -47,7 +48,7 @@ export async function Announcements() {
                                     )}>
                                         {item.category}
                                     </span>
-                                    <h3 className="font-heading font-bold text-2xl leading-tight text-primary">
+                                    <h3 className="font-heading font-bold text-2xl leading-tight text-primary group-hover:text-amber-600 transition-colors">
                                         {item.title}
                                     </h3>
                                     <div className="text-base text-muted-foreground line-clamp-3">
@@ -58,7 +59,7 @@ export async function Announcements() {
                                     <Calendar className="mr-2 h-4 w-4" />
                                     {format(new Date(item.date), "MMMM d, yyyy")}
                                 </div>
-                            </div>
+                            </Link>
                         )))}
                 </div>
             </div>
