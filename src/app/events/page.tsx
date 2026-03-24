@@ -111,9 +111,9 @@ export default async function EventsPage() {
                                 </div>
 
                                 <div className="mt-10 pt-8 border-t border-muted/50 relative z-10">
-                                    <Link href="/check-in" className="w-full">
+                                    <Link href={`/events/${event.id}`} className="w-full">
                                         <Button className="w-full h-14 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-primary/10 group-hover:scale-[1.02] transition-transform">
-                                            Plan My Visit
+                                            View Details
                                         </Button>
                                     </Link>
                                 </div>

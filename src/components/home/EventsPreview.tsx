@@ -65,7 +65,7 @@ export function EventsPreview({ events, bgImage }: { events: Event[], bgImage?: 
                                 {events.map((event, index) => (
                                     <Link
                                         key={event.id}
-                                        href={`/check-in`}
+                                        href={`/events/${event.id}`}
                                         className="group relative block bg-white dark:bg-neutral-900 rounded-[2.5rem] border border-muted dark:border-white/5 p-8 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
                                     >
                                         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">

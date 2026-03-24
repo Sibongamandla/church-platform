@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AddToCalendar } from "@/components/events/AddToCalendar";
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -133,15 +134,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                             <div className="pt-4 space-y-4">
                                 {!isPast && (
-                                    <Link href="/check-in" className="w-full">
-                                        <Button className="w-full h-16 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20">
-                                            Plan Your Visit
-                                        </Button>
-                                    </Link>
+                                    <AddToCalendar 
+                                        event={{
+                                            title: event.title,
+                                            description: event.description || "Join us for this special gathering.",
+                                            location: event.location || "Great Nation Auditorium",
+                                            startDate: new Date(event.startDate),
+                                            endDate: new Date(event.endDate || new Date(event.startDate).getTime() + 2 * 60 * 60 * 1000)
+                                        }} 
+                                    />
                                 )}
                                 <Button variant="outline" className="w-full h-16 rounded-2xl font-bold border-2">
                                     <Share2 className="mr-2 h-5 w-5" />
-                                    Share Memories
+                                    Share Event
                                 </Button>
                             </div>
                         </div>
