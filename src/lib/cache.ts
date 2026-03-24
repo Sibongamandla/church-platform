@@ -10,8 +10,8 @@ export const CACHE_TAGS = {
 
 // Revalidation times (in seconds)
 export const REVALIDATE = {
-    SHORT: 60,       // 1 minute
-    MEDIUM: 3600,    // 1 hour
+    SHORT: 0,        // Immediate
+    MEDIUM: 0,       // Immediate
     LONG: 86400,     // 24 hours
 };
 
