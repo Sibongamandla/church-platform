@@ -3,12 +3,14 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { Announcements } from "@/components/home/Announcements";
 import { EventsPreview } from "@/components/home/EventsPreview";
 import { LatestSermon } from "@/components/home/LatestSermon";
-import { getCachedEvents, getLatestSermon } from "@/lib/cache";
+import { getCachedEvents, getLatestSermon, getFeaturedRecaps } from "@/lib/cache";
 import { getSiteMedia } from "@/app/actions/content";
+import { RecapsPreview } from "@/components/home/RecapsPreview";
 
 export default async function Home() {
   const events = await getCachedEvents();
   const latestSermon = await getLatestSermon();
+  const featuredRecaps = await getFeaturedRecaps();
   const slides = await prisma.homeSlide.findMany({
     where: { isActive: true },
     orderBy: { order: "asc" }
@@ -33,6 +35,7 @@ export default async function Home() {
         events={events} 
         bgImage={media["home_events_preview_bg"]}
       />
+      <RecapsPreview recaps={featuredRecaps} />
     </div>
   );
 }

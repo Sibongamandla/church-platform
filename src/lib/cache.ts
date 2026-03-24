@@ -105,3 +105,26 @@ export const getPastEvents = unstable_cache(
         tags: [CACHE_TAGS.events],
     }
 );
+export const getFeaturedRecaps = unstable_cache(
+    async () => {
+        return await prisma.event.findMany({
+            where: {
+                startDate: {
+                    lt: new Date(),
+                },
+                recapImages: {
+                    isEmpty: false,
+                },
+            },
+            orderBy: {
+                startDate: "desc",
+            },
+            take: 3,
+        });
+    },
+    ["featured-recaps"],
+    {
+        revalidate: REVALIDATE.MEDIUM,
+        tags: [CACHE_TAGS.events],
+    }
+);

@@ -57,6 +57,8 @@ export default async function ServiceRosterEditorPage({ params }: { params: Prom
 
             <RosterEditor 
                 sessionId={session.id}
+                sessionName={session.name}
+                sessionDate={session.date.toLocaleDateString()}
                 scheduleId={session.schedule?.id}
                 assignments={session.schedule?.assignments || []}
                 teams={teams}

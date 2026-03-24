@@ -16,12 +16,16 @@ type Team = { id: string; name: string; roles: { id: string, name: string }[]; m
 
 export function RosterEditor({ 
     sessionId,
+    sessionName,
+    sessionDate,
     scheduleId,
     assignments,
     teams,
     linkedTeamIds = []
 }: { 
     sessionId: string;
+    sessionName: string;
+    sessionDate: string;
     scheduleId?: string;
     assignments: Assignment[];
     teams: Team[];
@@ -78,15 +82,15 @@ export function RosterEditor({
     const generateWhatsAppLink = (a: Assignment) => {
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
         const confirmUrl = `${baseUrl}/volunteer/confirm/${a.id}`;
-        const message = `Hi ${a.member.firstName}, you've been scheduled for service on our roster as ${a.role.name}. Your call time is ${a.callTime || 'the start of service'}. Please confirm here: ${confirmUrl}`;
+        const message = `Hi ${a.member.firstName}, you've been scheduled for ${sessionName} on ${sessionDate} as ${a.role.name}. Your call time is ${a.callTime || 'the start of service'}. Please confirm here: ${confirmUrl}`;
         return `https://wa.me/${a.member.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
     }
 
     const generateEmailLink = (a: Assignment) => {
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
         const confirmUrl = `${baseUrl}/volunteer/confirm/${a.id}`;
-        const subject = `Service Roster Assignment`;
-        const body = `Hi ${a.member.firstName},\n\nYou've been scheduled to serve as ${a.role.name} on our roster.\n\nYour call time is ${a.callTime || 'the start of service'}.\n\nPlease confirm your availability here: ${confirmUrl}\n\nThank you!`;
+        const subject = `Service Roster: ${sessionName}`;
+        const body = `Hi ${a.member.firstName},\n\nYou've been scheduled to serve as ${a.role.name} for our ${sessionName} on ${sessionDate}.\n\nYour call time is ${a.callTime || 'the start of service'}.\n\nPlease confirm your availability here: ${confirmUrl}\n\nThank you!`;
         return `mailto:${a.member.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
 
