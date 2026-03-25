@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getActiveSession } from "@/lib/sessions";
 import Link from "next/link";
 import { Calendar, CheckCircle, Users, QrCode, Clock, Plus } from "lucide-react";
+import { formatDateTime, formatTime } from "@/lib/utils";
 
 export default async function AttendanceDashboard() {
     const today = new Date();
@@ -26,7 +27,7 @@ export default async function AttendanceDashboard() {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Attendance</h1>
                     <p className="text-muted-foreground">
-                        {today.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        {formatDateTime(today, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -101,7 +102,7 @@ export default async function AttendanceDashboard() {
                                 </div>
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
-                                    {record.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {formatTime(record.createdAt)}
                                 </div>
                             </div>
                         ))

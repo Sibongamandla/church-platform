@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Calendar, CheckCircle, Clock, XCircle, Plus, RefreshCw } from "lucide-react";
 import { SyncSessionsButton } from "@/components/volunteers/SyncSessionsButton";
 import { syncUpcomingSessions } from "@/lib/sessions";
+import { formatDateTime, formatTime } from "@/lib/utils";
 
 export default async function RostersPage() {
     // Proactively sync upcoming sessions for the next 2 weeks
@@ -66,7 +67,7 @@ export default async function RostersPage() {
                             <div>
                                 <h3 className="text-xl font-bold">{session.name}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {session.date.toLocaleDateString()} at {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {formatDateTime(session.date)} at {formatTime(session.startTime)}
                                 </p>
                             </div>
                             {/* Link would go to a detailed roster editor page for this session */}

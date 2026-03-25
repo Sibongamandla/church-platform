@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, Calendar, Clock, CheckCircle } from "lucide-react";
+import { formatDateTime, formatTime } from "@/lib/utils";
 
 export default async function SessionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -33,7 +34,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                     <h1 className="text-3xl font-bold tracking-tight">{session.name}</h1>
                     <p className="text-muted-foreground flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        {session.date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        {formatDateTime(session.date, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
             </div>
@@ -54,8 +55,8 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                         <Clock className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="text-sm font-medium">
-                        {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                        {session.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(session.startTime)} - 
+                        {formatTime(session.endTime)}
                     </div>
                     <p className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Duration: {Math.round((session.endTime.getTime() - session.startTime.getTime()) / (1000 * 60))} minutes</p>
                 </div>
@@ -96,7 +97,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                 </div>
                                 <div className="text-right">
                                     <div className="text-xs font-semibold tabular-nums">
-                                        {record.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                        {formatTime(record.createdAt, { second: '2-digit' })}
                                     </div>
                                     <p className="text-[10px] text-muted-foreground">Original Timestamp</p>
                                 </div>

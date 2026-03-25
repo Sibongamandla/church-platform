@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft, Clock, TrendingUp, Users } from "lucide-react";
+import { cn, formatDateTime, formatTime } from "@/lib/utils";
 
 export default async function AttendanceHistoryPage() {
     const sessions = await prisma.serviceSession.findMany({
@@ -93,11 +94,11 @@ export default async function AttendanceHistoryPage() {
                                     <td className="p-4 align-middle">
                                         <Link href={`/admin/attendance/history/${session.id}`} className="block">
                                             <div className="text-sm">
-                                                {session.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                                {formatDateTime(session.date, { weekday: 'short', month: 'short', day: 'numeric' })}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                                                {session.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {formatTime(session.startTime)} - 
+                                                {formatTime(session.endTime)}
                                             </div>
                                         </Link>
                                     </td>
@@ -121,6 +122,4 @@ export default async function AttendanceHistoryPage() {
     );
 }
 
-function cn(...classes: any[]) {
-    return classes.filter(Boolean).join(" ");
-}
+

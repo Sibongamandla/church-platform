@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { RosterEditor } from "@/components/volunteers/RosterEditor";
+import { formatDateTime, formatTime } from "@/lib/utils";
 
 export default async function ServiceRosterEditorPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -52,7 +53,7 @@ export default async function ServiceRosterEditorPage({ params }: { params: Prom
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Edit Roster: {session.name}</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        {session.date.toLocaleDateString()} at {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatDateTime(session.date)} at {formatTime(session.startTime)}
                     </p>
                 </div>
             </div>
