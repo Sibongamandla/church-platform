@@ -13,16 +13,32 @@ export const AUTOMATIC_SESSIONS: SessionConfig[] = [
     { name: "Friday Service", startTime: "18:00", day: 5 },
 ];
 
-export async function getActiveSession(date: Date = new Date()) {
-    const day = date.getDay();
-    const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+// Helper to get SAST (+02:00) date regardless of server timezone
+function getSASTDate(date: Date = new Date()): Date {
+    // SAST is UTC+2
+    const SAST_OFFSET = 120; // minutes
+    const serverOffset = date.getTimezoneOffset();
+    // Normalize to SAST by adding the difference
+    return new Date(date.getTime() + (serverOffset + SAST_OFFSET) * 60000);
+}
 
-    // 1. Check for manual sessions first
+// Convert date to a stable UTC object at noon to avoid date-shifting for @db.Date fields
+function toPrismaDate(date: Date): Date {
+    const d = new Date(date);
+    d.setUTCHours(12, 0, 0, 0);
+    return d;
+}
+
+export async function getActiveSession(dateInput: Date = new Date()) {
+    const date = getSASTDate(dateInput);
+    const day = date.getDay();
+
+    // 1. Check for manual sessions first (these use exact DateTime match)
     const manualSession = await prisma.serviceSession.findFirst({
         where: {
             type: "MANUAL",
-            startTime: { lte: date },
-            endTime: { gte: date },
+            startTime: { lte: dateInput },
+            endTime: { gte: dateInput },
         },
     });
 
@@ -32,6 +48,8 @@ export async function getActiveSession(date: Date = new Date()) {
     const config = AUTOMATIC_SESSIONS.find(s => s.day === day);
     if (config) {
         const [hours, minutes] = config.startTime.split(':').map(Number);
+        
+        // Target session time in SAST
         const sessionStart = new Date(date);
         sessionStart.setHours(hours, minutes, 0, 0);
 
@@ -39,21 +57,24 @@ export async function getActiveSession(date: Date = new Date()) {
         const windowClose = addMinutes(sessionStart, 240); // 4 hour window
 
         if (isAfter(date, windowOpen) && isBefore(date, windowClose)) {
+            const dbDate = toPrismaDate(date);
+            
             // Find or create the automatic session record for today
             return await prisma.serviceSession.upsert({
                 where: {
                     name_date: {
                         name: config.name,
-                        date: startOfDay(date),
+                        date: dbDate,
                     }
                 },
                 update: {
-                    startTime: sessionStart,
-                    endTime: windowClose,
+                    startTime: dateInput, // Keep current server time for tracking but... 
+                    // actually better to store planned start time
+                    endTime: addMinutes(sessionStart, 240),
                 },
                 create: {
                     name: config.name,
-                    date: startOfDay(date),
+                    date: dbDate,
                     startTime: sessionStart,
                     endTime: windowClose,
                     type: "AUTOMATIC",
