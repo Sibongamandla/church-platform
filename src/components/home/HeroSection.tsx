@@ -62,29 +62,46 @@ export function HeroSection({ initialSlides = [] }: { initialSlides?: any[] }) {
 
                 {/* Main Heading & Content */}
                 <div className="max-w-4xl mx-auto space-y-6 animate-fade-in-up">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                        </span>
-                        Live Service Every Sunday
+                    <div className="inline-flex flex-col items-center gap-4 mb-8">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-[0.2em]">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                            </span>
+                            Live Service Every Sunday
+                        </div>
+                        
+                        {/* Compact Service Info Badge */}
+                        <div className="flex items-center gap-6 px-6 py-3 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-md rounded-2xl border border-primary/10 shadow-sm animate-fade-in delay-300">
+                            <div className="flex items-center gap-3">
+                                <CalendarIcon className="h-4 w-4 text-primary" />
+                                <span className="font-heading font-black text-sm uppercase tracking-tight">Sunday</span>
+                            </div>
+                            <div className="h-4 w-px bg-primary/20" />
+                            <div className="flex items-center gap-3">
+                                <Clock className="h-4 w-4 text-amber-500" />
+                                <span className="font-heading font-black text-sm uppercase tracking-tight">09:00 AM</span>
+                            </div>
+                        </div>
                     </div>
+
                     <h1 className="text-6xl md:text-9xl font-heading font-black tracking-tighter uppercase leading-[0.85] text-primary">
-                        {slides[currentSlide].title.split(' ')[0]} <br />
+                        <span className="text-3xl md:text-5xl block text-muted-foreground mb-4 lowercase italic font-medium tracking-normal normal-case">Welcome to</span>
+                        Great Nation <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-tr from-amber-500 via-orange-500 to-red-600">
-                            {slides[currentSlide].title.split(' ')[1]}
+                            Ministries
                         </span>
                     </h1>
                     <p className="max-w-2xl mx-auto text-xl md:text-2xl text-muted-foreground font-medium leading-relaxed">
-                        {slides[currentSlide].description || slides[currentSlide].subtitle}
+                        Join our vibrant community as we grow in faith and love together.
                     </p>
                 </div>
 
                 {/* Hero Actions */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md mx-auto animate-fade-in-up delay-100">
-                    <Link href="/check-in" className="w-full">
+                    <Link href="/connect" className="w-full">
                         <Button className="w-full h-16 rounded-2xl text-lg font-black uppercase tracking-widest shadow-2xl shadow-primary/30 group">
-                            Plan Your Visit
+                            Connect with Us
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Button>
                     </Link>
@@ -101,7 +118,7 @@ export function HeroSection({ initialSlides = [] }: { initialSlides?: any[] }) {
                     <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.1)] border-8 border-white dark:border-white/5">
                         {slides.map((slide, index) => (
                             <div
-                                key={slide.image}
+                                key={slide.imageUrl || index}
                                 className={cn(
                                     "absolute inset-0 transition-all duration-1000 ease-in-out transform",
                                     index === currentSlide ? "opacity-100 scale-100" : "opacity-0 scale-110 pointer-events-none"
@@ -137,27 +154,7 @@ export function HeroSection({ initialSlides = [] }: { initialSlides?: any[] }) {
                         </div>
                     </div>
 
-                    {/* Service Info Floating Badge */}
-                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-neutral-900 px-10 py-6 rounded-[2rem] shadow-2xl flex items-center gap-8 border border-muted dark:border-white/10 whitespace-nowrap">
-                        <div className="flex items-center gap-4 border-r pr-8">
-                            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                                <CalendarIcon className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Main Service</p>
-                                <p className="font-heading font-bold text-lg">Sunday</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600">
-                                <Clock className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Starts At</p>
-                                <p className="font-heading font-bold text-lg">09:00 AM</p>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Service Info Floating Badge - REMOVED since it's now under the title badge */}
                 </div>
 
             </div>

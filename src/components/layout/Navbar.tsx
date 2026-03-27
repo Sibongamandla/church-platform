@@ -30,7 +30,7 @@ export function Navbar({ user }: { user: any }) {
         { name: "About", href: "/about" },
         { name: "Events", href: "/events" },
         { name: "Sermons", href: "/sermons" },
-        { name: user ? "Check-in" : "Visit", href: "/check-in" },
+        { name: user ? "Check-in" : "Connect", href: "/connect" },
     ];
 
     return (
@@ -84,7 +84,7 @@ export function Navbar({ user }: { user: any }) {
                                         Login
                                     </Button>
                                 </Link>
-                                <Link href="/check-in">
+                                <Link href="/connect">
                                     <Button className="rounded-full px-6 font-bold shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90">
                                         I'm New
                                     </Button>
@@ -155,9 +155,9 @@ export function Navbar({ user }: { user: any }) {
                                     Member Login
                                 </Button>
                             </Link>
-                            <Link href="/check-in" className="w-full">
+                            <Link href="/connect" className="w-full">
                                 <Button className="w-full h-14 text-lg rounded-2xl bg-primary text-primary-foreground">
-                                    Plan a Visit
+                                    Connect with Us
                                 </Button>
                             </Link>
                         </>
