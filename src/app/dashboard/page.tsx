@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     if (!user) return null; // handled by layout
 
     // Find linked member profile by User ID
-    const member = await prisma.member.findUnique({
+    let member = await prisma.member.findUnique({
         where: { userId: user.id },
         include: {
             smartProfile: true,
@@ -27,6 +27,30 @@ export default async function DashboardPage() {
             }
         }
     });
+
+    // Fallback: If no member found by userId, try to link by email
+    if (!member && user.email) {
+        const potentialMember = await prisma.member.findFirst({
+            where: { email: user.email },
+        });
+
+        if (potentialMember) {
+            member = await prisma.member.update({
+                where: { id: potentialMember.id },
+                data: { userId: user.id },
+                include: {
+                    smartProfile: true,
+                    recruits: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 5
+                    },
+                    _count: {
+                        select: { recruits: true }
+                    }
+                }
+            });
+        }
+    }
 
     const smartProfile = member?.smartProfile;
     const recruitsCount = member?._count.recruits || 0;

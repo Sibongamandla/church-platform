@@ -30,6 +30,17 @@ export async function createMemberAction(prevState: any, formData: FormData) {
     const { firstName, lastName, email, phone, address, birthday, gender, status } = parsed.data;
 
     try {
+        // Find if a User exists with this email
+        let existingUserId = null;
+        if (email) {
+            const existingUser = await prisma.user.findUnique({
+                where: { email },
+            });
+            if (existingUser) {
+                existingUserId = existingUser.id;
+            }
+        }
+
         await prisma.member.create({
             data: {
                 firstName,
@@ -40,6 +51,7 @@ export async function createMemberAction(prevState: any, formData: FormData) {
                 birthday: birthday ? new Date(birthday) : null,
                 gender: gender || null,
                 status,
+                userId: existingUserId,
             },
         });
     } catch (error) {
@@ -66,6 +78,17 @@ export async function updateMemberAction(prevState: any, formData: FormData) {
     const { firstName, lastName, email, phone, address, birthday, gender, status } = parsed.data;
 
     try {
+        // Find if a User exists with this email
+        let existingUserId = null;
+        if (email) {
+            const existingUser = await prisma.user.findUnique({
+                where: { email },
+            });
+            if (existingUser) {
+                existingUserId = existingUser.id;
+            }
+        }
+
         await prisma.member.update({
             where: { id },
             data: {
@@ -77,6 +100,7 @@ export async function updateMemberAction(prevState: any, formData: FormData) {
                 birthday: birthday ? new Date(birthday) : null,
                 gender: gender || null,
                 status,
+                ...(existingUserId ? { userId: existingUserId } : {}),
             }
         });
     } catch (error) {

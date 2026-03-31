@@ -8,10 +8,25 @@ export default async function MyProfilePage() {
     const user = await getCurrentUser();
     if (!user) redirect("/login");
 
-    const member = await prisma.member.findUnique({
+    let member = await prisma.member.findUnique({
         where: { userId: user.id },
         include: { smartProfile: true }
     });
+
+    // Fallback: If no member found by userId, try to link by email
+    if (!member && user.email) {
+        const potentialMember = await prisma.member.findFirst({
+            where: { email: user.email },
+        });
+
+        if (potentialMember) {
+            member = await prisma.member.update({
+                where: { id: potentialMember.id },
+                data: { userId: user.id },
+                include: { smartProfile: true },
+            });
+        }
+    }
 
     if (!member) {
         return (
