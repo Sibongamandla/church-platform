@@ -46,7 +46,7 @@ export async function createAdminUserAction(prevState: any, formData: FormData) 
         },
     });
 
-    // Link to Member Record if email matches
+    // Link to Member Record if email matches, or create a new one
     const existingMember = await prisma.member.findFirst({
         where: { email }
     });
@@ -55,6 +55,18 @@ export async function createAdminUserAction(prevState: any, formData: FormData) 
         await prisma.member.update({
             where: { id: existingMember.id },
             data: { userId: user.id }
+        });
+    } else {
+        // Automatically create a Member record for the new user
+        const [firstName, ...lastNameParts] = name.split(" ");
+        await prisma.member.create({
+            data: {
+                userId: user.id,
+                email: email,
+                firstName: firstName || name,
+                lastName: lastNameParts.join(" ") || " ",
+                status: "ACTIVE",
+            }
         });
     }
 

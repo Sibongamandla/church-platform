@@ -28,12 +28,28 @@ export default async function MyProfilePage() {
         }
     }
 
+    // If still no member found, create one for the legitimate logged-in user!
+    if (!member && user.email) {
+        const [firstName, ...lastNameParts] = (user.name || "Unknown").split(" ");
+        member = await prisma.member.create({
+            data: {
+                userId: user.id,
+                email: user.email,
+                firstName: firstName || "Unknown",
+                lastName: lastNameParts.join(" ") || " ",
+                status: "ACTIVE",
+            },
+            include: { smartProfile: true }
+        });
+    }
+
     if (!member) {
+        // Fallback for extremely rare edge cases where member creation fails
         return (
             <div className="p-8 text-center">
-                <h1 className="text-xl font-bold text-destructive">Member Record Not Found</h1>
+                <h1 className="text-xl font-bold text-destructive">Profile System Error</h1>
                 <p className="text-muted-foreground">
-                    We assume your account email matches your member record. Please contact an admin if you see this.
+                    We could not load or generate your member profile. Please contact an admin.
                 </p>
             </div>
         );
