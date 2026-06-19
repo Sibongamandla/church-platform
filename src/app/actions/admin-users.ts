@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, requireRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { generateSecureTempCode } from '@/lib/security';
+import { logAuditEvent } from '@/lib/audit';
 
 const createUserSchema = z.object({
     name: z.string().min(2),
@@ -33,7 +35,7 @@ export async function createAdminUserAction(prevState: any, formData: FormData) 
     }
 
     // Generate 6-digit temporary code
-    const tempCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const tempCode = generateSecureTempCode();
     const hashedPassword = await hashPassword(tempCode);
 
     const user = await prisma.user.create({
@@ -70,6 +72,8 @@ export async function createAdminUserAction(prevState: any, formData: FormData) 
         });
     }
 
+    await logAuditEvent({ userId: admin.id, action: 'USER_CREATE', resource: 'user', details: { createdUserId: user.id, email, role } });
+
     revalidatePath("/admin/settings/users");
     return { success: true, tempCode };
 }
@@ -90,6 +94,8 @@ export async function deleteUserAction(prevState: any, formData: FormData) {
         where: { id },
     });
 
+    await logAuditEvent({ userId: admin.id, action: 'USER_DELETE', resource: 'user', details: { deletedUserId: id } });
+
     revalidatePath("/admin/settings/users");
     return { success: true };
 }
@@ -107,6 +113,8 @@ export async function updateUserRoleAction(prevState: any, formData: FormData) {
         where: { id },
         data: { role },
     });
+
+    await logAuditEvent({ userId: admin.id, action: 'USER_ROLE_CHANGE', resource: 'user', details: { targetUserId: id, newRole: role } });
 
     revalidatePath("/admin/settings/users");
     return { success: true };

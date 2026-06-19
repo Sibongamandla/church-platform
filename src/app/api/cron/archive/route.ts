@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, subDays } from "date-fns";
 import { getCurrentSessionName } from "@/lib/sessions";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.NODE_ENV === 'production') {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return new Response('Unauthorized', { status: 401 });
     }
 
@@ -57,6 +58,12 @@ export async function GET(request: Request) {
                 results.push(session);
             }
         }
+
+        await logAuditEvent({
+            action: 'CRON_ARCHIVE',
+            resource: 'cron',
+            details: { archived: results.length, sessionIds: results.map(r => r.id) },
+        });
 
         return NextResponse.json({ success: true, archived: results.length, sessions: results });
     } catch (error) {

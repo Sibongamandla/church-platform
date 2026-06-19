@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { sanitizeFilename, getFileExtension, validateImageMagicBytes, MAX_FILE_SIZES } from "@/lib/security";
+import { logAuditEvent } from "@/lib/audit";
 
 const profileSchema = z.object({
     slug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug must use lowercase letters, numbers, and hyphens only"),
@@ -37,17 +39,22 @@ export async function createSmartProfileAction(prevState: any, formData: FormDat
 
     if (file && file.size > 0 && file.name !== "undefined") {
         try {
+            if (file.size > MAX_FILE_SIZES.IMAGE) {
+                return { error: "Image must be under 5MB." };
+            }
+
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
-            // Allow only images
-            if (!file.type.startsWith("image/")) {
-                return { error: "Only image files are allowed." };
+            // Validate image via magic bytes (more reliable than client-reported MIME type)
+            const isValidImage = await validateImageMagicBytes(buffer);
+            if (!isValidImage) {
+                return { error: "Invalid image file. Please upload a valid JPEG, PNG, GIF, or WebP image." };
             }
 
             // Create filename: slug-timestamp.ext
-            const ext = file.name.split(".").pop();
-            const filename = `${slug}-${Date.now()}.${ext}`;
+            const ext = getFileExtension(file.name) || 'jpg';
+            const filename = `${sanitizeFilename(slug)}-${Date.now()}.${ext}`;
             const uploadDir = join(process.cwd(), "public/uploads");
 
             // Ensure dir exists
@@ -94,6 +101,13 @@ export async function createSmartProfileAction(prevState: any, formData: FormDat
         return { error: "Failed to create profile." };
     }
 
+    await logAuditEvent({
+        userId: null,
+        action: 'PROFILE_CREATE',
+        resource: 'profiles',
+        details: { slug, memberId },
+    });
+
     revalidatePath("/admin/evangelism");
     return { success: true };
 }
@@ -136,15 +150,21 @@ export async function saveMyProfileAction(prevState: any, formData: FormData) {
 
     if (file && file.size > 0 && file.name !== "undefined") {
         try {
+            if (file.size > MAX_FILE_SIZES.IMAGE) {
+                return { error: "Image must be under 5MB." };
+            }
+
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
-            if (!file.type.startsWith("image/")) {
-                return { error: "Only image files are allowed." };
+            // Validate image via magic bytes (more reliable than client-reported MIME type)
+            const isValidImage = await validateImageMagicBytes(buffer);
+            if (!isValidImage) {
+                return { error: "Invalid image file. Please upload a valid JPEG, PNG, GIF, or WebP image." };
             }
 
-            const ext = file.name.split(".").pop();
-            const filename = `${slug}-${Date.now()}.${ext}`;
+            const ext = getFileExtension(file.name) || 'jpg';
+            const filename = `${sanitizeFilename(slug)}-${Date.now()}.${ext}`;
             const uploadDir = join(process.cwd(), "public/uploads");
 
             await mkdir(uploadDir, { recursive: true });
@@ -191,6 +211,13 @@ export async function saveMyProfileAction(prevState: any, formData: FormData) {
         return { error: "Failed to save profile." };
     }
 
+    await logAuditEvent({
+        userId: user.id,
+        action: 'PROFILE_UPDATE',
+        resource: 'profiles',
+        details: { slug, memberId: member.id },
+    });
+
     revalidatePath("/dashboard");
     revalidatePath(`/e/${slug}`);
     return { success: true };
@@ -204,7 +231,6 @@ export async function getSmartProfileBySlug(slug: string) {
                 select: {
                     firstName: true,
                     lastName: true,
-                    email: true, // Maybe careful showing email publically? Let's hide it for now unless specific
                 }
             }
         }

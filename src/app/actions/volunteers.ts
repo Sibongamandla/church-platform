@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireRole, requireAuth } from "@/lib/auth";
 import { z } from "zod";
+import { logAuditEvent } from '@/lib/audit';
 
 export async function createTeamAction(prevState: any, formData: FormData) {
     await requireRole("SUPER_ADMIN");
@@ -122,12 +123,16 @@ export async function scheduleVolunteerAction({
 }
 
 export async function updateAssignmentStatusAction(assignmentId: string, status: "PENDING" | "CONFIRMED" | "DECLINED") {
-    // Ideally this could be done by the member themselves
+    const user = await requireRole('SUPER_ADMIN');
+
     try {
         await prisma.rosterAssignment.update({
             where: { id: assignmentId },
             data: { status }
         });
+
+        await logAuditEvent({ userId: user.id, action: 'VOLUNTEER_STATUS_CHANGE', resource: 'volunteers', details: { assignmentId, status } });
+
         revalidatePath("/admin/volunteers/roster");
         // Also revalidate member portal if we had one
         return { success: true };
@@ -178,14 +183,6 @@ export async function publicJoinTeamAction(teamId: string, memberId?: string, da
     try {
         let finalMemberId = memberId;
 
-        // If memberId is provided, and we have data (phone), update the member's record
-        if (finalMemberId && data?.phone) {
-            await prisma.member.update({
-                where: { id: finalMemberId },
-                data: { phone: data.phone }
-            });
-        }
-
         // If no memberId, we create/find by phone (Quick Form)
         if (!finalMemberId && data) {
             const existing = await prisma.member.findFirst({
@@ -221,6 +218,8 @@ export async function publicJoinTeamAction(teamId: string, memberId?: string, da
                 roleId: null,
             }
         });
+
+        await logAuditEvent({ userId: null, action: 'VOLUNTEER_JOIN', resource: 'volunteers', details: { teamId, memberId: finalMemberId } });
 
         revalidatePath("/volunteer");
         revalidatePath(`/admin/volunteers/${teamId}`);
@@ -268,6 +267,9 @@ export async function updateAssignmentStatusPublicAction(assignmentId: string, s
             where: { id: assignmentId },
             data: { status }
         });
+
+        await logAuditEvent({ userId: null, action: 'VOLUNTEER_STATUS_CHANGE', resource: 'volunteers', details: { assignmentId, status, public: true } });
+
         revalidatePath("/admin/volunteers/roster");
         return { success: true };
     } catch (error) {

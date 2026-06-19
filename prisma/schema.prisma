@@ -304,3 +304,39 @@ model ServiceTeam {
 
   @@unique([teamId, sessionId])
 }
+
+// ==========================================
+// SECURITY & AUDIT
+// ==========================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  // Null for unauthenticated actions (e.g., public check-in)
+  action    String   // e.g., "DATA_EXPORT", "MEMBER_CREATE", "LOGIN", "CHECK_IN"
+  resource  String   // e.g., "members", "attendance", "auth"
+  details   String?  // JSON string with additional context
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model DataExport {
+  id           String    @id @default(cuid())
+  userId       String
+  token        String    @unique
+  format       String    // "csv" or "json"
+  scope        String    // "members"
+  fields       String    // JSON array of included fields
+  filters      String?   // JSON object of filters applied
+  status       String    @default("PENDING") // PENDING, DOWNLOADED, EXPIRED
+  expiresAt    DateTime
+  downloadedAt DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([token])
+  @@index([userId])
+}

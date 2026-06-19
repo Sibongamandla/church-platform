@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireRole } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const recapSchema = z.object({
     eventId: z.string(),
@@ -11,6 +13,8 @@ const recapSchema = z.object({
 });
 
 export async function updateEventRecapAction(prevState: any, formData: FormData) {
+    const user = await requireRole('CONTENT_EDITOR');
+
     const data = Object.fromEntries(formData.entries());
     const parsed = recapSchema.safeParse(data);
 
@@ -30,6 +34,8 @@ export async function updateEventRecapAction(prevState: any, formData: FormData)
             },
         });
 
+        await logAuditEvent({ userId: user.id, action: 'CONTENT_UPDATE', resource: 'media', details: { type: 'event_recap', eventId } });
+
         revalidatePath("/", "layout");
         revalidatePath("/events", "layout");
         return { success: true };
@@ -46,6 +52,8 @@ const highlightSchema = z.object({
 });
 
 export async function updateSermonHighlightAction(prevState: any, formData: FormData) {
+    const user = await requireRole('CONTENT_EDITOR');
+
     const data = Object.fromEntries(formData.entries());
     const parsed = highlightSchema.safeParse(data);
 
@@ -63,6 +71,8 @@ export async function updateSermonHighlightAction(prevState: any, formData: Form
                 highlightVideoUrl,
             },
         });
+
+        await logAuditEvent({ userId: user.id, action: 'CONTENT_UPDATE', resource: 'media', details: { type: 'sermon_highlight', sermonId } });
 
         revalidatePath("/", "layout");
         revalidatePath("/sermons", "layout");

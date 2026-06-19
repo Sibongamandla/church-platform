@@ -6,6 +6,8 @@ import { startOfDay, addDays } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { requireRole } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const sessionSchema = z.object({
     name: z.string().min(1, "Session name is required"),
@@ -26,6 +28,8 @@ export type ManualSessionState = {
 };
 
 export async function createManualSessionAction(prevState: ManualSessionState, formData: FormData): Promise<ManualSessionState> {
+    const user = await requireRole('SUPER_ADMIN');
+
     const data = Object.fromEntries(formData.entries());
     const parsed = sessionSchema.safeParse(data);
 
@@ -54,6 +58,8 @@ export async function createManualSessionAction(prevState: ManualSessionState, f
             }
         });
 
+        await logAuditEvent({ userId: user.id, action: 'SESSION_CREATE', resource: 'sessions', details: { name, date } });
+
         revalidatePath("/admin/attendance");
     } catch (error) {
         console.error("Manual session creation error:", error);
@@ -64,8 +70,13 @@ export async function createManualSessionAction(prevState: ManualSessionState, f
 }
 
 export async function syncAutomaticSessionsAction() {
+    const user = await requireRole('SUPER_ADMIN');
+
     try {
         const sessionsSynced = await syncUpcomingSessions(14);
+
+        await logAuditEvent({ userId: user.id, action: 'SESSION_SYNC', resource: 'sessions', details: { count: sessionsSynced.length } });
+
         revalidatePath("/admin/volunteers/roster");
         revalidatePath("/admin/attendance");
         return { success: true, count: sessionsSynced.length };

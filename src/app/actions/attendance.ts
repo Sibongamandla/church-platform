@@ -5,6 +5,9 @@ import { getCurrentSessionName, getActiveSession } from "@/lib/sessions";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { redirect } from "next/navigation";
+import { logAuditEvent } from "@/lib/audit";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { maskPhoneNumber } from "@/lib/security";
 
 // NOTE: These are public actions for kiosk/self-service.
 // We remove strict role checks but ensure logic is safe.
@@ -57,6 +60,12 @@ export async function checkInMultipleMembersAction(memberIds: string[]) {
             });
         }
 
+        await logAuditEvent({
+            action: 'MEMBER_CHECK_IN',
+            resource: 'attendance',
+            details: { memberCount: toCheckIn.length, memberIds: toCheckIn },
+        });
+
         revalidatePath("/admin/attendance");
         return { success: true, message: "Check-in successful!" };
     } catch (e) {
@@ -71,6 +80,9 @@ export async function checkInMemberAction(memberId: string) {
 
 export async function searchMembersForKioskAction(query: string) {
     if (!query || query.length < 2) return [];
+
+    const rateCheck = checkRateLimit('kiosk-search', RATE_LIMITS.KIOSK_SEARCH);
+    if (!rateCheck.success) return [];
 
     // Simple search
     const results = await prisma.member.findMany({
@@ -88,7 +100,6 @@ export async function searchMembersForKioskAction(query: string) {
             firstName: true,
             lastName: true,
             phone: true,
-            email: true,
             status: true,
             familyId: true,
             family: {
@@ -106,7 +117,17 @@ export async function searchMembersForKioskAction(query: string) {
         }
     });
 
-    return results;
+    return results.map(member => ({
+        ...member,
+        phone: member.phone ? maskPhoneNumber(member.phone) : null,
+        family: member.family ? {
+            ...member.family,
+            members: member.family.members.map(fm => ({
+                ...fm,
+                phone: fm.phone ? maskPhoneNumber(fm.phone) : null,
+            }))
+        } : null,
+    }));
 }
 
 const visitorSchema = z.object({
@@ -142,10 +163,22 @@ export async function registerVisitorAction(formData: FormData) {
         }
     }
 
-    let familyMembers: any[] = [];
+    const familyMemberSchema = z.array(z.object({
+        firstName: z.string().min(1),
+        lastName: z.string().optional(),
+        gender: z.string().optional(),
+        birthday: z.string().optional(),
+    }));
+
+    let familyMembers: z.infer<typeof familyMemberSchema> = [];
     if (familyMembersJSON) {
         try {
-            familyMembers = JSON.parse(familyMembersJSON);
+            const parsed = familyMemberSchema.safeParse(JSON.parse(familyMembersJSON));
+            if (parsed.success) {
+                familyMembers = parsed.data;
+            } else {
+                console.error('Invalid family members data:', parsed.error);
+            }
         } catch (e) {
             console.error("Failed to parse family members JSON");
         }
@@ -217,6 +250,12 @@ export async function registerVisitorAction(formData: FormData) {
 
         // Check everyone in
         await checkInMultipleMembersAction(allCheckInIds);
+
+        await logAuditEvent({
+            action: 'VISITOR_REGISTER',
+            resource: 'members',
+            details: { primaryMemberId, familyMemberCount: familyMembers.length },
+        });
 
     } catch (error) {
         console.error(error);

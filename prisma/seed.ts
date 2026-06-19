@@ -1,10 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    const adminPassword = await bcrypt.hash("admin123", 12);
+    const seedPassword = process.env.ADMIN_SEED_PASSWORD || crypto.randomUUID().slice(0, 16);
+    if (!process.env.ADMIN_SEED_PASSWORD) {
+        console.log('\n⚠️  Generated random admin password:', seedPassword);
+        console.log('   Save this password! It will not be shown again.\n');
+    }
+    const adminPassword = await bcrypt.hash(seedPassword, 12);
 
     const admin = await prisma.user.upsert({
         where: { email: "admin@greatnation.org" },

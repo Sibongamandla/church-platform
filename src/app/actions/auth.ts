@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword, createSession, deleteSession, getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { logAuditEvent } from "@/lib/audit";
 
 const registerSchema = z.object({
     name: z.string().min(2),
@@ -31,21 +33,29 @@ export async function loginAction(prevState: any, formData: FormData) {
 
     const { email, password } = parsed.data;
 
+    const rateCheck = checkRateLimit(`login:${email}`, RATE_LIMITS.LOGIN);
+    if (!rateCheck.success) {
+        return { error: "Too many login attempts. Please try again later." };
+    }
+
     const user = await prisma.user.findUnique({
         where: { email },
     });
 
     if (!user) {
+        await logAuditEvent({ action: "LOGIN_FAILED", resource: "auth", details: { email, reason: "user_not_found" } });
         return { error: "Invalid credentials" };
     }
 
     const isValid = await verifyPassword(password, user.password);
 
     if (!isValid) {
+        await logAuditEvent({ action: "LOGIN_FAILED", resource: "auth", details: { email, reason: "invalid_password" } });
         return { error: "Invalid credentials" };
     }
 
     await createSession(user.id);
+    await logAuditEvent({ userId: user.id, action: "LOGIN", resource: "auth", details: { email } });
 
     // Check if the user needs to set their password (onboarding)
     if ((user as any).setupRequired) {
@@ -98,6 +108,10 @@ export async function setupPasswordAction(prevState: any, formData: FormData) {
 }
 
 export async function logoutAction() {
+    const user = await getCurrentUser();
+    if (user) {
+        await logAuditEvent({ userId: user.id, action: "LOGOUT", resource: "auth" });
+    }
     await deleteSession();
     redirect("/login");
 }

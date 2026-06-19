@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireRole } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const slideSchema = z.object({
     id: z.string().optional(),
@@ -15,6 +17,8 @@ const slideSchema = z.object({
 });
 
 export async function upsertHomeSlideAction(prevState: any, formData: FormData) {
+    const user = await requireRole('CONTENT_EDITOR');
+
     const data = {
         id: formData.get("id") as string || undefined,
         title: formData.get("title") as string,
@@ -42,6 +46,8 @@ export async function upsertHomeSlideAction(prevState: any, formData: FormData) 
             });
         }
 
+        await logAuditEvent({ userId: user.id, action: 'CONTENT_UPDATE', resource: 'content', details: { type: 'home_slide', title: data.title } });
+
         revalidatePath("/");
         revalidatePath("/admin/content");
         return { success: true };
@@ -52,8 +58,13 @@ export async function upsertHomeSlideAction(prevState: any, formData: FormData) 
 }
 
 export async function deleteHomeSlideAction(id: string) {
+    const user = await requireRole('CONTENT_EDITOR');
+
     try {
         await prisma.homeSlide.delete({ where: { id } });
+
+        await logAuditEvent({ userId: user.id, action: 'CONTENT_DELETE', resource: 'content', details: { type: 'home_slide', slideId: id } });
+
         revalidatePath("/");
         revalidatePath("/admin/content");
         return { success: true };
@@ -68,6 +79,8 @@ export async function deleteHomeSlideAction(id: string) {
 // ==========================================
 
 export async function upsertSiteMediaAction(prevState: any, formData: FormData) {
+    const user = await requireRole('CONTENT_EDITOR');
+
     const key = formData.get("key") as string;
     const url = formData.get("url") as string;
     const label = formData.get("label") as string;
@@ -82,6 +95,8 @@ export async function upsertSiteMediaAction(prevState: any, formData: FormData) 
             update: { url, label },
             create: { key, url, label },
         });
+
+        await logAuditEvent({ userId: user.id, action: 'MEDIA_UPDATE', resource: 'content', details: { key, label } });
 
         revalidatePath("/");
         revalidatePath("/sermons");

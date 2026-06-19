@@ -57,10 +57,28 @@ export async function getSession() {
 
     const session = await prisma.session.findUnique({
         where: { sessionToken },
-        include: { user: true },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    image: true,
+                    emailVerified: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    setupRequired: true,
+                },
+            },
+        },
     });
 
     if (!session || session.expires < new Date()) {
+        // Clean up expired session
+        if (session) {
+            await prisma.session.delete({ where: { id: session.id } }).catch(() => {});
+        }
         return null;
     }
 
@@ -84,6 +102,16 @@ export async function requireRole(role: Role) {
     const user = await requireAuth();
     if (user.role !== role && user.role !== "SUPER_ADMIN") {
         redirect("/"); // Or unauthorized page
+    }
+    return user;
+}
+
+const ADMIN_ROLES: Role[] = ['SUPER_ADMIN', 'CONTENT_EDITOR', 'FINANCE_ADMIN', 'REGISTRY_CLERK'];
+
+export async function requireAdminRole() {
+    const user = await requireAuth();
+    if (!ADMIN_ROLES.includes(user.role as Role)) {
+        redirect('/');
     }
     return user;
 }
