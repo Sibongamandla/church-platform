@@ -57,13 +57,8 @@ export function DataExportClient({ exportFields, exportHistory, auditLogs }: Dat
             setMessage({ type: "error", text: result.error });
         } else if (result.token) {
             setMessage({ type: "success", text: "Export ready! Downloading..." });
-            // Trigger download via an invisible link to prevent navigation cancellation
-            const a = document.createElement("a");
-            a.href = `/api/export/${result.token}`;
-            a.download = "export";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Trigger download via window.location (safe for async file downloads)
+            window.location.href = `/api/export/${result.token}`;
             
             // Refresh Server Component data without full page reload
             setTimeout(() => {
@@ -192,8 +187,8 @@ export function DataExportClient({ exportFields, exportHistory, auditLogs }: Dat
                                                     {exp.format}
                                                 </span>
                                             </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {isMounted ? new Date(exp.createdAt).toLocaleString() : exp.createdAt.toString()}
+                                            <div className="text-xs text-muted-foreground min-h-[16px]">
+                                                {isMounted ? new Date(exp.createdAt).toLocaleString() : ""}
                                             </div>
                                         </div>
                                         
