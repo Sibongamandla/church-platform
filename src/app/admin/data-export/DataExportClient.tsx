@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { requestDataExportAction } from "@/app/actions/export";
 import type { MemberExportField, ExportFormat } from "@/lib/export-types";
 
@@ -11,6 +12,13 @@ interface DataExportClientProps {
 }
 
 export function DataExportClient({ exportFields, exportHistory, auditLogs }: DataExportClientProps) {
+    const router = useRouter();
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     const [selectedFields, setSelectedFields] = useState<MemberExportField[]>(
         exportFields.map(f => f.key) // Default all selected
     );
@@ -49,12 +57,17 @@ export function DataExportClient({ exportFields, exportHistory, auditLogs }: Dat
             setMessage({ type: "error", text: result.error });
         } else if (result.token) {
             setMessage({ type: "success", text: "Export ready! Downloading..." });
-            // Trigger download via API endpoint
-            window.location.href = `/api/export/${result.token}`;
+            // Trigger download via an invisible link to prevent navigation cancellation
+            const a = document.createElement("a");
+            a.href = `/api/export/${result.token}`;
+            a.download = "export";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             
-            // Reload page after a short delay to update history list
+            // Refresh Server Component data without full page reload
             setTimeout(() => {
-                window.location.reload();
+                router.refresh();
             }, 3000);
         }
     };
@@ -180,7 +193,7 @@ export function DataExportClient({ exportFields, exportHistory, auditLogs }: Dat
                                                 </span>
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {new Date(exp.createdAt).toLocaleString()}
+                                                {isMounted ? new Date(exp.createdAt).toLocaleString() : exp.createdAt.toString()}
                                             </div>
                                         </div>
                                         
