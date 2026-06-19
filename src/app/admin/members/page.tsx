@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Search, Filter, MoreHorizontal, Mail, Phone, MapPin, Upload } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Mail, Phone, MapPin, Upload, Download } from "lucide-react";
 // import { deleteMemberAction } from "@/app/actions/members"; // Will use in row actions
 
 export default async function MembersPage({
@@ -61,6 +61,13 @@ export default async function MembersPage({
                     >
                         <Upload className="mr-2 h-4 w-4" />
                         Import CSV
+                    </Link>
+                    <Link
+                        href="/admin/data-export"
+                        className="inline-flex items-center justify-center rounded-md border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
+                    >
+                        <Download className="mr-2 h-4 w-4" />
+                        Export Data
                     </Link>
                     <Link
                         href="/admin/members/new"
