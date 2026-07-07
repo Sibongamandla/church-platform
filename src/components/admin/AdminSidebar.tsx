@@ -17,7 +17,8 @@ import {
     X,
     HeartHandshake,
     Layers,
-    Image as ImageIcon
+    Image as ImageIcon,
+    BarChart2
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -33,6 +34,7 @@ const navLinks = [
     { href: "/admin/volunteers", label: "Volunteers", icon: HeartHandshake },
     { href: "/admin/attendance", label: "Attendance", icon: ClipboardCheck },
     { href: "/admin/qrcodes", label: "QR Codes", icon: QrCode },
+    { href: "/admin/analytics", label: "Analytics", icon: BarChart2 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

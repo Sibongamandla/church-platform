@@ -43,6 +43,7 @@ export const viewport = {
   ],
 };
 
+import { Analytics } from "@vercel/analytics/next";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -61,6 +62,7 @@ export default async function RootLayout({
         manrope.variable,
         "antialiased min-h-screen flex flex-col bg-background text-foreground"
       )}>
+        <Analytics />
         <ScrollToTop />
         <ConditionalShell user={user} />
         <main className="flex-1">{children}</main>

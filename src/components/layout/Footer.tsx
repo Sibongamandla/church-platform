@@ -98,23 +98,23 @@ export function Footer() {
                             <li className="flex items-start gap-3 text-sm text-muted-foreground">
                                 <MapPin className="h-5 w-5 shrink-0 text-primary" />
                                 <span>
-                                    123 Church Avenue
+                                    1 Lana Street, Model Park
                                     <br />
-                                    Cityville, ST 12345
+                                    Witbank, 1035, Mpumalanga
                                     <br />
                                     Sunday Services: 9am & 11am
                                 </span>
                             </li>
                             <li className="flex items-center gap-3 text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4 shrink-0 text-primary" />
-                                <a href="tel:+1234567890" className="hover:text-primary">
-                                    (555) 123-4567
+                                <a href="tel:+27638189667" className="hover:text-primary">
+                                    063 818 9667
                                 </a>
                             </li>
                             <li className="flex items-center gap-3 text-sm text-muted-foreground">
                                 <Mail className="h-4 w-4 shrink-0 text-primary" />
-                                <a href="mailto:info@greatnationministries.com" className="hover:text-primary">
-                                    info@greatnationministries.com
+                                <a href="mailto:admin@greatnationministries.org.za" className="hover:text-primary">
+                                    admin@greatnationministries.org.za
                                 </a>
                             </li>
                         </ul>

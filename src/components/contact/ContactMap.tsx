@@ -25,9 +25,11 @@ export function ContactMap() {
                     <div>
                         <h3 className="font-semibold text-lg text-foreground">Visit Us</h3>
                         <p className="text-muted-foreground mt-1">
-                            123 Church Avenue
+                            1 Lana Street, Model Park
                             <br />
-                            Cityville, ST 12345
+                            Witbank, 1035
+                            <br />
+                            Mpumalanga
                         </p>
                     </div>
                 </div>
