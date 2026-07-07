@@ -42,7 +42,7 @@ export function ActionableInsights({ insights }: { insights: Insight[] }) {
     if (insights.length === 0) return null;
 
     return (
-        <div className="no-print">
+        <div className="analytics-section">
             <h2 className="text-lg font-semibold mb-4">Actionable Insights</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {insights.map((insight, i) => {

@@ -116,3 +116,82 @@
     transform: translateY(0);
   }
 }
+
+/* ─── Print Stylesheet ──────────────────────────────────────────────────────── */
+
+/* Screen-only elements hidden when printing */
+@media print {
+  /* Hide sidebar / nav / mobile header chrome */
+  aside,
+  nav,
+  header,
+  .screen-only {
+    display: none !important;
+  }
+
+  /* Remove the sidebar offset from the main content area */
+  main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Show print-only header */
+  .print-only-header {
+    display: block !important;
+  }
+
+  /* Preserve background colors & gradients */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Page settings */
+  @page {
+    margin: 16mm;
+    size: A4;
+  }
+
+  /* Prevent cards / chart blocks from splitting across pages */
+  .rounded-xl,
+  .print-summary-card,
+  .analytics-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force page breaks before large sections */
+  .space-y-6 {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Keep the first section (health + stats) on the first page */
+  .space-y-8 > .grid:first-of-type {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  /* Reset bg-muted/20 on the flex wrapper so it prints white */
+  body,
+  .flex.min-h-screen {
+    background: white !important;
+  }
+
+  /* Remove shadows in print — they waste ink */
+  .shadow-sm,
+  .shadow-md {
+    box-shadow: none !important;
+  }
+
+  /* Make sure charts render at full width */
+  .recharts-responsive-container {
+    width: 100% !important;
+  }
+}
+
+/* Hide print-only-header on screen (JS fallback covered inline, this is belt-and-suspenders) */
+.print-only-header {
+  display: none;
+}

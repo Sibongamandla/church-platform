@@ -78,7 +78,7 @@ export function StoryCards({ admin, engagement, content }: Props) {
         : "None";
 
     return (
-        <div className="grid gap-6 md:grid-cols-3 no-print">
+        <div className="grid gap-6 md:grid-cols-3">
             {/* Admin Activity */}
             <div className="rounded-xl border bg-card shadow-sm p-6">
                 <div className="flex items-center gap-2 mb-4">

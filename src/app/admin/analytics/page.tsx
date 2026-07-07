@@ -14,17 +14,17 @@ export default async function AnalyticsPage() {
     const now = new Date();
     const thirtyDaysAgo = subDays(now, 30);
     const ninetyDaysAgo = subDays(now, 90);
-    const sevenDaysAgo = subDays(now, 7);
-    const fourteenDaysAgo = subDays(now, 14);
     const sixMonthsAgo = startOfMonth(subMonths(now, 5));
     const thisMonthStart = startOfMonth(now);
+    // Audit window: February 1 of the current year to present
+    const auditWindowStart = new Date(now.getFullYear(), 1, 1);
 
     const [
         // Summary cards
         totalMembers,
         totalSessions,
         totalLinkClicks,
-        auditCount30d,
+        auditCountSinceFeb,
 
         // Health score inputs
         latestSermon,
@@ -35,10 +35,10 @@ export default async function AnalyticsPage() {
         newMembersThisMonth,
 
         // Admin story
-        loginEvents30d,
-        auditLogs30d,
+        loginEventsSinceFeb,
+        auditLogsSinceFeb,
         allUsers,
-        auditByAction30d,
+        auditByActionSinceFeb,
 
         // Member engagement
         attendanceRecords90d,
@@ -61,7 +61,7 @@ export default async function AnalyticsPage() {
         prisma.member.count({ where: { status: "ACTIVE" } }),
         prisma.serviceSession.count(),
         prisma.shortLink.aggregate({ _sum: { clicks: true } }),
-        prisma.auditLog.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+        prisma.auditLog.count({ where: { createdAt: { gte: auditWindowStart } } }),
 
         prisma.sermon.findFirst({ orderBy: { date: "desc" }, select: { date: true, title: true } }),
         prisma.event.findFirst({ where: { startDate: { gte: now } }, orderBy: { startDate: "asc" }, select: { startDate: true, title: true } }),
@@ -71,18 +71,18 @@ export default async function AnalyticsPage() {
         prisma.member.count({ where: { createdAt: { gte: thisMonthStart } } }),
 
         prisma.auditLog.findMany({
-            where: { action: "LOGIN", createdAt: { gte: thirtyDaysAgo } },
+            where: { action: "LOGIN", createdAt: { gte: auditWindowStart } },
             select: { userId: true, createdAt: true },
         }),
         prisma.auditLog.findMany({
-            where: { createdAt: { gte: thirtyDaysAgo } },
+            where: { createdAt: { gte: auditWindowStart } },
             select: { action: true, resource: true, userId: true, createdAt: true },
             orderBy: { createdAt: "desc" },
         }),
         prisma.user.findMany({ select: { id: true, name: true, email: true } }),
         prisma.auditLog.groupBy({
             by: ["action"],
-            where: { createdAt: { gte: thirtyDaysAgo } },
+            where: { createdAt: { gte: auditWindowStart } },
             _count: { action: true },
             orderBy: { _count: { action: "desc" } },
         }),
@@ -169,10 +169,10 @@ export default async function AnalyticsPage() {
     }
 
     // ─── Admin Story ────────────────────────────────────────────────────────────
-    const loginDays = new Set(loginEvents30d.map(e => format(new Date(e.createdAt), "yyyy-MM-dd"))).size;
-    const uniqueAdmins = new Set(loginEvents30d.filter(e => e.userId).map(e => e.userId)).size;
-    const topAction = auditByAction30d[0];
-    const lastAuditEntry = auditLogs30d[0];
+    const loginDays = new Set(loginEventsSinceFeb.map(e => format(new Date(e.createdAt), "yyyy-MM-dd"))).size;
+    const uniqueAdmins = new Set(loginEventsSinceFeb.filter(e => e.userId).map(e => e.userId)).size;
+    const topAction = auditByActionSinceFeb[0];
+    const lastAuditEntry = auditLogsSinceFeb[0];
 
     // ─── Attendance Patterns ────────────────────────────────────────────────────
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -193,12 +193,12 @@ export default async function AnalyticsPage() {
     const memberGrowth = Array.from(growthMap.entries()).map(([month, count]) => ({ month, count }));
     const attendance = recentSessions.reverse().map(s => ({ name: `${s.name} ${format(new Date(s.date), "d MMM")}`, headcount: s.headcount }));
     const linkClicksData = shortLinks.map(l => ({ slug: l.slug, clicks: l.clicks }));
-    const auditActionsData = auditByAction30d.map(a => ({ action: a.action, count: a._count.action }));
+    const auditActionsData = auditByActionSinceFeb.map(a => ({ action: a.action, count: a._count.action }));
 
     // ─── Print Audit ─────────────────────────────────────────────────────────────
     const serialisedAudit = fullAuditLog.map(e => ({ ...e, createdAt: e.createdAt.toISOString() }));
     const usersForAudit = allUsers.map(u => ({ id: u.id, name: u.name, email: u.email }));
-    const auditActionStats = auditByAction30d.map(a => ({ action: a.action, count: a._count.action }));
+    const auditActionStats = auditByActionSinceFeb.map(a => ({ action: a.action, count: a._count.action }));
     const auditDateRange = {
         from: fullAuditLog.length > 0 ? format(new Date(fullAuditLog[fullAuditLog.length - 1].createdAt), "d MMM yyyy") : "—",
         to: fullAuditLog.length > 0 ? format(new Date(fullAuditLog[0].createdAt), "d MMM yyyy") : "—",
@@ -208,19 +208,28 @@ export default async function AnalyticsPage() {
         { label: "Active Members", value: totalMembers, icon: Users, color: "text-blue-600 bg-blue-100" },
         { label: "Service Sessions", value: totalSessions, icon: ClipboardCheck, color: "text-green-600 bg-green-100" },
         { label: "Total Link Clicks", value: totalLinkClicks._sum.clicks ?? 0, icon: Link2, color: "text-purple-600 bg-purple-100" },
-        { label: "Audit Events (30d)", value: auditCount30d, icon: ShieldCheck, color: "text-amber-600 bg-amber-100" },
+        { label: "Audit Events (Since Feb)", value: auditCountSinceFeb, icon: ShieldCheck, color: "text-amber-600 bg-amber-100" },
     ];
 
     return (
         <div className="space-y-8">
-            {/* Header */}
-            <div className="no-print">
+            {/* Print-only full-page header */}
+            <div className="print-only-header" style={{ display: "none" }}>
+                <h1 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 4px" }}>Great Nation Ministries — Analytics Report</h1>
+                <p style={{ fontSize: 11, color: "#6b7280", margin: 0 }}>
+                    Generated: {format(now, "d MMMM yyyy, HH:mm")}
+                </p>
+                <hr style={{ margin: "12px 0", borderColor: "#e5e7eb" }} />
+            </div>
+
+            {/* Screen header */}
+            <div className="screen-only">
                 <h1 className="text-3xl font-bold tracking-tight">Analytics & Insights</h1>
                 <p className="text-muted-foreground mt-1">Platform health, engagement patterns, and actionable recommendations</p>
             </div>
 
             {/* Top row: health score + summary stats */}
-            <div className="grid gap-6 lg:grid-cols-3 no-print">
+            <div className="grid gap-6 lg:grid-cols-3">
                 <PlatformHealth score={healthScore} breakdown={healthBreakdown} />
                 <div className="lg:col-span-2 grid grid-cols-2 gap-4 content-start">
                     {summaryStats.map((stat) => (
@@ -244,7 +253,7 @@ export default async function AnalyticsPage() {
             <StoryCards
                 admin={{
                     loginDaysLast30: loginDays,
-                    totalActionsLast30: auditLogs30d.length,
+                    totalActionsLast30: auditLogsSinceFeb.length,
                     mostCommonAction: topAction?.action ?? "",
                     mostCommonActionCount: topAction?._count?.action ?? 0,
                     uniqueAdmins,

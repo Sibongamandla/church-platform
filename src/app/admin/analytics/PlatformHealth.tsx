@@ -48,7 +48,7 @@ function ScoreRing({ score }: { score: number }) {
 
 export function PlatformHealth({ score, breakdown }: Props) {
     return (
-        <div className="rounded-xl border bg-card shadow-sm p-6 no-print">
+        <div className="rounded-xl border bg-card shadow-sm p-6">
             <h2 className="text-lg font-semibold mb-6">Platform Health</h2>
             <div className="flex flex-col sm:flex-row items-center gap-8">
                 <ScoreRing score={score} />

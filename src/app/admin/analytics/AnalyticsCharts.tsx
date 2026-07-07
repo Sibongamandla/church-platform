@@ -30,7 +30,7 @@ export function AnalyticsCharts({ memberGrowth, attendance, linkClicks, auditAct
     const maxDay = attendanceByDay.reduce((max, d) => d.count > max ? d.count : max, 0);
 
     return (
-        <div className="space-y-6 no-print">
+        <div className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
                 {/* Member Growth */}
                 <div className="rounded-xl border bg-card p-6 shadow-sm">
