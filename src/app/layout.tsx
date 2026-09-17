@@ -43,7 +43,9 @@ export const viewport = {
   ],
 };
 
-import { Analytics } from "@vercel/analytics/next";
+export const dynamic = "force-dynamic";
+
+import { Analytics } from "@vercel/analytics/react";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -53,7 +55,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Toggle this variable to lock/unlock the platform
-  const IS_MAINTENANCE = true;
+  const IS_MAINTENANCE = false;
 
   if (IS_MAINTENANCE) {
     return (

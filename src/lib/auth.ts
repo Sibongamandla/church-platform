@@ -50,8 +50,13 @@ export async function deleteSession() {
 }
 
 export async function getSession() {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("session_token")?.value;
+    let sessionToken: string | undefined;
+    try {
+        const cookieStore = await cookies();
+        sessionToken = cookieStore.get("session_token")?.value;
+    } catch {
+        return null;
+    }
 
     if (!sessionToken) return null;
 
